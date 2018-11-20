@@ -340,16 +340,16 @@ public class GUIPlayer : MonoBehaviour{
 
     public void AddPlayerControlled(PlayerControlled PlayerControlledIn)
     {
-        if (!selectedObjects.Contains(PlayerControlledIn))
-        {
-            selectedObjects.Add(PlayerControlledIn);
-            PlayerControlledIn.Selected(true);
-            if(!selectedObject)
-            {
-                selectedObject = PlayerControlledIn;
-                selectManager.UpdatePanels();
-            }
-        }
+		if (PlayerControlledIn) {
+			if (!selectedObjects.Contains (PlayerControlledIn)) {
+				selectedObjects.Add (PlayerControlledIn);
+				PlayerControlledIn.Selected (true);
+				if (!selectedObject) {
+					selectedObject = PlayerControlledIn;
+					selectManager.UpdatePanels ();
+				}
+			}
+		}
     }
 
     public bool RemovePlayerControlled(List<PlayerControlled> PlayerControlledIn)
@@ -430,10 +430,10 @@ public class GUIPlayer : MonoBehaviour{
         belowVec.y = ToPos.y;
         drawToMove.SetPosition(2, belowVec);
 
-        drawFromRad.SetRadius(Selected.selectionHeight / 2);
+        drawFromRad.SetRadius(Selected.colliderHeight / 2);
         drawFromRad.transform.position = belowVec;
 
-        drawToRad.SetRadius(Selected.selectionHeight / 2);
+        drawToRad.SetRadius(Selected.colliderHeight / 2);
         drawToRad.transform.position = ToPos;
 
         drawMoveRad.SetRadius(Vector3.Distance(ToPos, belowVec));

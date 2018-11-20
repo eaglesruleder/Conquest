@@ -4,8 +4,7 @@ using System.Collections;
 
 public class GUISelectionStat : MonoBehaviour {
 
-    public Unit selectedUnit = null;
-    public Structure selectedStructure = null;
+    public PlayerControlled selected = null;
 
     public GameObject selectedTitle;
     public GameObject selectedKillsLabel;
@@ -17,38 +16,31 @@ public class GUISelectionStat : MonoBehaviour {
 
     public void UpdatePanel(PlayerControlled SelectedObject)
     {
-        if (SelectedObject != null)
+        selected = SelectedObject;
+        if (selected is Unit)
         {
-            if (SelectedObject.unitComponent)
-            {
-                selectedUnit = SelectedObject.unitComponent;
-                selectedStructure = null;
-
-                selectedKillsLabel.SetActive(true);
-                selectedKills.SetActive(true);
-                selectedSuppliesLabel.SetActive(true);
-                selectedSupplies.SetActive(true);
-            }
-            else if (SelectedObject.structureComponent)
-            {
-                selectedStructure = SelectedObject.structureComponent;
-                selectedUnit = null;
-
-                selectedKillsLabel.SetActive(false);
-                selectedKills.SetActive(false);
-                selectedSuppliesLabel.SetActive(false);
-                selectedSupplies.SetActive(false);
-            }
+            selectedKillsLabel.SetActive(true);
+            selectedKills.SetActive(true);
+            selectedSuppliesLabel.SetActive(true);
+            selectedSupplies.SetActive(true);
+        }
+        else
+        {
+            selectedKillsLabel.SetActive(false);
+            selectedKills.SetActive(false);
+            selectedSuppliesLabel.SetActive(false);
+            selectedSupplies.SetActive(false);
         }
     }
 
     void Update()
     {
-        if(selectedUnit != null)
+        if(selected is Unit)
         {
-            selectedTitle.GetComponent<Text>().text = selectedUnit.name;
-            selectedKills.GetComponent<Text>().text = selectedUnit.Kills.ToString();
-            selectedHealth.GetComponent<Text>().text = selectedUnit.hull.currentHull.ToString() + "/" + selectedUnit.hull.ReturnHullMax().ToString();
+            selectedTitle.GetComponent<Text>().text = selected.pcName;
+            selectedKills.GetComponent<Text>().text = ((Unit) selected).currentKills.ToString();
+            selectedHealth.GetComponent<Text>().text = selected.currentHull.ToString() + "/" + ((Unit)selected).ReturnMaxHealth().ToString();
+            selectedSupplies.GetComponent<Text>().text = ((Unit)selected).currentSupply.ToString() + "/" + ((Unit)selected).ReturnSupplyMax().ToString();
         }
     }
 }

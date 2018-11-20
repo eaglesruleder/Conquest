@@ -1,13 +1,11 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Camera\GUIPlayer.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Objects\Terran\Prefabs\Weapons\Gattling\Ter_Gattling.cs">
     <Files>
-      <File FileName="Assets\Scripts\Camera\GUIPrefabs\GUISelectionManager.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Camera\GUIPlayer.cs" Line="189" Column="7" />
-      <File FileName="Assets\Scripts\Camera\GUIPrefabs\GUISelectionManager\GUISelectionAbility.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Camera\GUIPrefabs\GUISelectionManager\GUISelectionLevel.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Camera\GUIPrefabs\GUISelectionManager\GUISelectionSelect.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Camera\GUIPrefabs\GUISelectionManager\GUISelectionStat.cs" Line="1" Column="1" />
+      <File FileName="Assets\Objects\Terran\Prefabs\Weapons\Gattling\Ter_Gattling.cs" Line="58" Column="68" />
+      <File FileName="Assets\Objects\Terran\Prefabs\Weapons\Gattling\Ter_GattlingProjectile.cs" Line="10" Column="39" />
+      <File FileName="Assets\Scripts\Control\Weapons\UnitWeaponProjectile.cs" Line="6" Column="30" />
+      <File FileName="Assets\Scripts\Control\Weapons\UnitWeapon.cs" Line="72" Column="23" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

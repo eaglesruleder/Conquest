@@ -1,104 +1,60 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerControlled : MonoBehaviour {
+public abstract class PlayerControlled : MonoBehaviour {
 
-    public Unit unitComponent;
-    public Structure structureComponent;
     public GUIPlayer playerData;
     public string playerID;
-    public GameObject selectionObj;
-    public float selectionHeight;
 
-	public void Initialise(Unit UnitComponent, GUIPlayer PlayerData)
+    public string pcName;
+
+    public int currentHull = 0;
+
+    public GameObject selectionObj;
+    public float colliderHeight = 0f;
+
+    public virtual void Initialise(GUIPlayer PlayerData)
     {
-        unitComponent = UnitComponent;
-        structureComponent = null;
         playerData = PlayerData;
         playerID = playerData.playerID;
     }
 
-    public void Initialise(Structure StructureComponent, GUIPlayer PlayerData)
-    {
-        unitComponent = null;
-        structureComponent = StructureComponent;
-        playerData = PlayerData;
-    }
-
-    public Technology PlayerTech(int Index)
-    {
-        return playerData.playerTechs[Index];
-    }
+    public abstract bool Damage(int damage, float[] armorBonus, Vector3 hitPoint);
 
     public void Selected(bool Select)
     {
-        selectionObj.SetActive(Select);
-    }
-
-    public void SetTarget(PlayerControlled Target)
-    {
-        if(unitComponent)
+        if (selectionObj)
         {
-            unitComponent.targetObj = Target;
+            selectionObj.SetActive(Select);
         }
     }
 
-    public void SetMove(Vector3 TargetPositon, bool Increment)
+    public virtual void EndSelf()
     {
-        if(unitComponent)
+        if(!IsInvoking("EndNow"))
         {
-            unitComponent.SetMove(TargetPositon, Increment);
+            Invoke("EndNow", 1f);
         }
     }
-
-    public void KillSelf()
-    {
-        playerData.RemovePlayerControlled(this);
-
-        if(unitComponent)
-        {
-            unitComponent.KillSelf();
-        }
-
-        Invoke("EndSelf", 1);
-    }
-
-    private void EndSelf()
+    public virtual void EndNow()
     {
         Destroy(gameObject);
     }
 
-    public void KilledTarget()
-    {
-        if(unitComponent)
-        {
-            unitComponent.Kills++;
-        }
-    }
-
-    public void BecameInvisible()
+    public void OnBecameInvisible()
     {
         playerData.onScreen.Remove(this);
     }
 
-    public void BecameVisible()
+    public void OnBecameVisible()
     {
-        playerData.onScreen.Add(this);
+        if(currentHull > 0)
+        {
+            playerData.onScreen.Add(this);
+        }
     }
 
-    public bool Equals(PlayerControlled Compare)
-    {
-        if (Compare != null)
-        {
-            if (unitComponent && Compare.unitComponent)
-            {
-                return unitComponent.gameObject.Equals(Compare.unitComponent.gameObject);
-            }
-            if (structureComponent && Compare.structureComponent)
-            {
-                return structureComponent.gameObject.Equals(Compare.structureComponent.gameObject);
-            }
-        }
-        return false;
-    }
+    public abstract int ReturnMaxHealth();
+    public abstract void SetTarget(PlayerControlled Target);
+    public abstract void SetMove(Vector3 Destination, bool Increment);
 }

@@ -1,13 +1,18 @@
 fileFormatVersion: 2
 guid: 50fd7feb5ce98894cb33dea9d4e6bf98
+timeCreated: 1446469717
+licenseType: Free
 MonoImporter:
   serializedVersion: 2
   defaultReferences:
-  - destMarker: {fileID: 100000, guid: cfc087fb27d6137458192e8e60f2990e, type: 2}
-  - weaponLocations: {instanceID: 0}
   - hull: {instanceID: 0}
+  - shieldHit: {fileID: 100000, guid: b36ceba61ff102a4a8722a2c9ffd8e98, type: 2}
+  - unitData: {instanceID: 0}
+  - tempGUIPlayer: {instanceID: 0}
   - playerTech: {instanceID: 0}
   - targetObj: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
+  assetBundleName: 
+  assetBundleVariant: 

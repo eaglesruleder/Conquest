@@ -45,6 +45,8 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Objects\Terran\Prefabs\Weapons\Dual\Gattling\Ter_Gattling.cs" />
+     <Compile Include="Assets\Objects\Terran\Prefabs\Weapons\Dual\Gattling\Ter_GattlingProjectile.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraSway.cs" />
      <Compile Include="Assets\Scripts\Camera\GUIMoveRenderer.cs" />
      <Compile Include="Assets\Scripts\Camera\GUIPlayer.cs" />
@@ -58,22 +60,22 @@
      <Compile Include="Assets\Scripts\Control\Environment\Planet.cs" />
      <Compile Include="Assets\Scripts\Control\Environment\PlanetSlot.cs" />
      <Compile Include="Assets\Scripts\Control\Environment\SolarSystem.cs" />
-     <Compile Include="Assets\Scripts\Control\Structure\Structure.cs" />
-     <Compile Include="Assets\Scripts\Control\Units\Formation.cs" />
      <Compile Include="Assets\Scripts\Control\Units\PlayerControlled.cs" />
-     <Compile Include="Assets\Scripts\Control\Units\Projectile.cs" />
-     <Compile Include="Assets\Scripts\Control\Units\ProjectileFighter.cs" />
-     <Compile Include="Assets\Scripts\Control\Units\ProjectileLaser.cs" />
-     <Compile Include="Assets\Scripts\Control\Units\ProjectileMissile.cs" />
-     <Compile Include="Assets\Scripts\Control\Units\ProjectileProjectile.cs" />
      <Compile Include="Assets\Scripts\Control\Units\Shield.cs" />
      <Compile Include="Assets\Scripts\Control\Units\Unit.cs" />
+     <Compile Include="Assets\Scripts\Control\Units\UnitBuilder.cs" />
      <Compile Include="Assets\Scripts\Control\Units\UnitHull.cs" />
-     <Compile Include="Assets\Scripts\Control\Units\UnitWeapon.cs" />
-     <Compile Include="Assets\Scripts\Control\Units\UnitWeaponHanger.cs" />
-     <Compile Include="Assets\Scripts\Control\Units\UnitWeaponProjectile.cs" />
-     <Compile Include="Assets\Scripts\Control\Units\WeaponLayout.cs" />
      <Compile Include="Assets\Scripts\Control\Universal\Technology.cs" />
+     <Compile Include="Assets\Scripts\Control\Weapons\Ability.cs" />
+     <Compile Include="Assets\Scripts\Control\Weapons\Projectile.cs" />
+     <Compile Include="Assets\Scripts\Control\Weapons\ProjectileFighter.cs" />
+     <Compile Include="Assets\Scripts\Control\Weapons\ProjectileLaser.cs" />
+     <Compile Include="Assets\Scripts\Control\Weapons\ProjectileMissile.cs" />
+     <Compile Include="Assets\Scripts\Control\Weapons\ProjectileProjectile.cs" />
+     <Compile Include="Assets\Scripts\Control\Weapons\UnitWeapon.cs" />
+     <Compile Include="Assets\Scripts\Control\Weapons\UnitWeaponHanger.cs" />
+     <Compile Include="Assets\Scripts\Control\Weapons\UnitWeaponProjectile.cs" />
+     <Compile Include="Assets\Scripts\Formation.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

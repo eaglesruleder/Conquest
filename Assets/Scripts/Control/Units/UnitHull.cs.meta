@@ -1,8 +1,14 @@
 fileFormatVersion: 2
-guid: f6afc6c99038a314e850aed60822562e
+guid: 9de9d927f796d2540862283258fbbe3e
+timeCreated: 1447901887
+licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - shieldHit: {fileID: 100000, guid: b36ceba61ff102a4a8722a2c9ffd8e98, type: 2}
+  - selectionObj: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
+  assetBundleName: 
+  assetBundleVariant: 
