@@ -5,15 +5,20 @@ using System.Collections.Generic;
 [System.Serializable]
 public class PlanetSlot : MonoBehaviour{
 
-	public PlanetSlot toLeft;
-	public PlanetSlot toRight;
-	public Planet host;
-	public bool empty = true;
+	PlanetSlot toLeft;
+	PlanetSlot toRight;
+	Planet host;
+	bool empty = true;
 	
 	public void SetSides(PlanetSlot ToLeft, PlanetSlot ToRight)
 	{
 		toLeft = ToLeft;
 		toRight = ToRight;
+	}
+
+	public void SetHost(Planet Host)
+	{
+		host = Host;
 	}
 
 	public bool Check(bool EmptyState, int Radius)
@@ -29,7 +34,7 @@ public class PlanetSlot : MonoBehaviour{
 		return true;
 	}
 
-	public List<PlanetSlot> GetSlots(int Radius)
+	List<PlanetSlot> GetSlots(int Radius)
 	{
 		List<PlanetSlot> result = new List<PlanetSlot>(){this};
 		if(Radius != 0)

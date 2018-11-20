@@ -3,26 +3,20 @@ using System.Collections;
 
 public class ProjectileMissile : Projectile {
 
-    public float velocity = 1f;
-    public float turnMagnitude = 1f;
+    //ProjectileMissile Values
+	Loadable_Projectile.LP_Missile loadableMissile
+		{get{return (Loadable_Projectile.LP_Missile)loadable;}}
+	internal float velocity 		{get{return loadableMissile.velocity;}}
+	internal float turnMagnitude {get{return loadableMissile.turnMagnitude;}}
 
-    public float colliderHeight = 0.5f;
-
-    public override void Build(PlayerControlled Target, Unit Launcher, Vector3 FireDirection, int Damage, float[] ArmourBonus)
+    void Update()
     {
-        base.Build(Target, Launcher, FireDirection, Damage, ArmourBonus);
+		//	Determine thrust direction
+        Vector3 targetAim = (target) ? target.transform.position - transform.position : transform.forward;
+        Vector3 thrustDirection = Vector3.RotateTowards(transform.forward, targetAim, Time.deltaTime * turnMagnitude, 0.0F);
 
-        SphereCollider tempCollider = gameObject.AddComponent<SphereCollider>();
-        tempCollider.isTrigger = true;
-        tempCollider.radius = colliderHeight;
-    }
-
-	void Update()
-		{
-		Vector3 targetAim = target.transform.position - transform.position;
-		Vector3 thrustDirection = Vector3.RotateTowards(transform.forward, targetAim, Time.deltaTime * turnMagnitude, 0.0F);
+		//	Apply and push forward
         transform.rotation = Quaternion.LookRotation(thrustDirection);
-
         transform.position += transform.forward * velocity;
-		}
+    }
 }

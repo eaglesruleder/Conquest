@@ -25,39 +25,45 @@ public class PlayerControl : MonoBehaviour
 
     void Update()
     {
-        if (!(Input.GetMouseButton(0) || Input.GetMouseButton(1)))
+        if (!PCSelector.lockOut)
         {
             // Init camera translation for this frame.
             Vector3 translation = Vector3.zero;
 
+			//	Determine step distance
+			float step =  ScrollSpeed * Time.deltaTime;
+
             //Mouse Influence
-            //When middle-click rotate
+            //When middle-click
             if (Input.GetMouseButton(2))
-                transform.RotateAround(transform.position, Vector3.up, Input.GetAxis("Mouse X"));
+			{
+				//	Rotate around 'up'
+				//	Works with CameraSway but this obj needs to be perfectly horizontal for movement
+				transform.RotateAround(transform.position, Vector3.up, Input.GetAxis("Mouse X"));
+			}
+
             //Else determine screen margin influence.
             else
             {
                 // Move camera if mouse pointer reaches screen borders
                 if (Input.mousePosition.x <= Screen.width * screenMarginMin)
-                    translation += transform.right * -ScrollSpeed * Time.deltaTime;
+					translation += transform.right * -step;
 
                 if (Input.mousePosition.x >= Screen.width * screenMarginMax)
-                    translation += transform.right * ScrollSpeed * Time.deltaTime;
+					translation += transform.right * step;
 
                 if (Input.mousePosition.y <= Screen.height * screenMarginMin)
-                    translation += transform.forward * -ScrollSpeed * Time.deltaTime;
+					translation += transform.forward * -step;
 
                 if (Input.mousePosition.y >= Screen.height * screenMarginMax)
-                    translation += transform.forward * ScrollSpeed * Time.deltaTime;
+					translation += transform.forward * step;
             }
 
             //Keyboard Influence
-            float translationStep = 2 * ScrollSpeed * Time.deltaTime;
-            translation += transform.right * Input.GetAxis("Horizontal") * translationStep;
-            translation += transform.forward * Input.GetAxis("Vertical") * translationStep;
+			translation += transform.right * Input.GetAxis("Horizontal") * step;
+			translation += transform.forward * Input.GetAxis("Vertical") * step;
 
             //Mouse Wheel Influence
-
             float zoom = Input.GetAxis("Mouse ScrollWheel") * HeightSpeed * Time.deltaTime;
             if (zoom != 0)
                 translation += Vector3.up * -HeightSpeed * zoom;
@@ -65,16 +71,25 @@ public class PlayerControl : MonoBehaviour
             //Keep camera within level and zoom area
             Vector3 levelLimits = transform.position + translation;
 
-            if ((levelLimits.x * levelLimits.x) + (levelLimits.z * levelLimits.z) > (levelSize * levelSize))
+			//	If outside the radius
+            if (Vector3.Distance(levelLimits, Vector3.zero) > levelSize)
             {
                 translation.z = 0;
                 translation.x = 0;
             }
 
-            if (!(HeightMin < levelLimits.y || levelLimits.y < HeightMax))
+			//	If below threshhold zero out
+			if (levelLimits.y < HeightMin)
+			{
                 translation.y = 0;
+			}
+			//	PLACEHOLDER for when universe zoom
+			else if(levelLimits.y > HeightMax)
+			{
+				translation.y = 0;
+			}
 
-            // Finally move camera parallel to world axis
+            // Apply
             transform.position += translation;
         }
     }

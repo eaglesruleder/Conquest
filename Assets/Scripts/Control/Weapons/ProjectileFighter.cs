@@ -2,44 +2,59 @@
 using System.Collections;
 
 public class ProjectileFighter : Projectile {
-
-	public Vector3 targetLocation = Vector3.zero;
     
+    //ProjectileFighter Values
+	Loadable_Projectile.LP_Fighter loadableFighter
+		{get{return (Loadable_Projectile.LP_Fighter)loadable;}}
+	internal float	travelRadius		{get{return loadableFighter.travelRadius;}}
+	internal float	engageDistance		{get{return loadableFighter.engageDistance;}}
+	internal float	travelSpeed			{get{return loadableFighter.travelSpeed * Time.deltaTime / 100;}}
+	internal string	fighterProjectileID	{get{return loadableFighter.fighterProjectileID;}}
+	internal float	firerate			{get{return loadableFighter.firerate;}}
+
+
+    internal Vector3 targetLocation = Vector3.zero;
+    internal float travelStart = 0f;
+    internal float pause = 0f;
 	bool travelReturn = false;
-	public float travelRadius = 0;
-	public float engageDistance = 15f;
-    public float travelSpeed = 0.5f;
-    public float colliderHeight = 0.1f;
 	
-	ParticleSystem trail;
+	public override Projectile SetProjectile(Loadable_Projectile loading)
+	{
+		base.SetProjectile(loading);
 
-	public Projectile fighterBullet;
-    public float firerate = 0f;
-    float pause = 0f;
+		if (!SelectableLoadout.ForgeAvailable<Projectile>(loadableFighter.fighterProjectileID))
+		{
+			throw new UnityEngine.UnityException("projectileID " + loadableFighter.fighterProjectileID + " declared but not found on Loadable_Projectile.LP_Fighter " + loadableFighter.Loadable_ID);
+		}
 
-    public override void Build(PlayerControlled Target, Unit Launcher, Vector3 FireDirection, int Damage, float[] ArmourBonus)
+		Rigidbody fighterRB = gameObject.AddComponent<Rigidbody>();
+		fighterRB.useGravity = false;
+
+        return this;
+	}
+
+    public override void Initialise(PlayerControlled Target, PlayerControlled Launcher, int Damage, float[] ArmourBonus)
     {
-        base.Build(Target, Launcher, FireDirection, Damage, ArmourBonus);
-        targetLocation = transform.position;
+        base.Initialise(Target, Launcher, Damage, ArmourBonus);
 
-        SphereCollider tempCollider = gameObject.AddComponent<SphereCollider>();
-        tempCollider.isTrigger = true;
-        tempCollider.radius = colliderHeight;
-
-        Rigidbody fighterRB = gameObject.AddComponent<Rigidbody>();
-        fighterRB.useGravity = false;
+        targetLocation = launcher.transform.forward * 5;
+		travelStart = Time.time;
     }
 
     public void SetTarget(PlayerControlled Target)
     {
         target = Target;
-        targetPlayerID = target.playerID;
+        targetPlayerID = (target) ? target.playerID : null;
+
         targetLocation = RandomLocation(engageDistance);
     }
 
     public override void EndNow()
     {
-        travelReturn = true;
+		targetLocation = Vector3.zero;
+		travelStart = 0f;
+		pause = 0f;
+		travelReturn = false;
         base.EndNow();
     }
 
@@ -49,47 +64,65 @@ public class ProjectileFighter : Projectile {
         {
             if(hit.GetComponent<PlayerControlled>().Equals(launcher))
             {
-                Destroy(this);
+                EndNow();
             }
         }
     }
 
     void Update()
     {
-        Vector3 dest = (target) ? target.transform.position : launcher.transform.position;
-        dest += targetLocation;
+		//	dest is a world position, 
+		//	Meanwhile targetLocation is a 'localposition' to dest
 
-        //If running out of fuel return to launcher
-        if (travelReturn)
+		//	If there is a target, position around the target else the launcher	ADD	If there is no target and we are returning add nothing, else add the targetLocation
+		Vector3 dest = ((target) ? target.transform.position : launcher.transform.position) + ((!target && travelReturn) ? Vector3.zero : targetLocation);
+
+        // If nearby the target dest find new location
+        if (Vector3.Distance(dest, transform.position) < travelSpeed)
         {
-            targetLocation = launcher.transform.position;
+			targetLocation = (target) ? RandomLocation(engageDistance) : RandomLocation(travelRadius);
+
+			/*BUGGED //	If time to return to Launcher is less than time remaining
+			if((Vector3.Distance(launcher.transform.position, transform.position) / (loadableFighter.travelSpeed / 100)) >= (travelStart + loadableFighter.life - Time.time))
+			{
+				//	Set to return
+				travelReturn = true;
+
+				//	And if there is not a target
+				if(!target)
+				{
+					//	Overwrite dest parameter
+					dest = launcher.transform.position;
+				}
+			}*/
         }
 
-        // Else if nearby the target dest find new location
-        else if (Vector3.Distance(dest, transform.position) < travelSpeed)
-        {
-            targetLocation = (target) ? RandomLocation(engageDistance) : RandomLocation(travelRadius);
-        }
-
+        // If target and fire ready
         if(target && pause < Time.time)
         {
+            // If in firing range
             if(Vector3.Distance(target.transform.position, transform.position) < engageDistance)
             {
-                Projectile tempBullet = Instantiate(fighterBullet) as Projectile;
+                // Fire
+                Projectile tempBullet = (Projectile) SelectableLoadout.Forge<Projectile>(fighterProjectileID);
                 tempBullet.transform.position = transform.position;
-                tempBullet.Build(target, launcher, target.transform.position - transform.position, damage, armourBonus);
+                tempBullet.transform.rotation = transform.rotation;
+                tempBullet.Initialise(target, launcher, damage, armourBonus);
+
+				//	Set the Lasers parent to this
+				tempBullet.transform.parent = transform;
                 pause = Time.time + firerate;
             }
         }
 
         // Apply move
-        transform.rotation = Quaternion.LookRotation(dest - transform.position, Vector3.up);
-        Vector3 travelNorm = Vector3.Normalize(dest - transform.position);
-        transform.position += travelNorm * travelSpeed;
+		transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, dest - transform.position, Time.deltaTime * 2, 0.0F), Vector3.up);
+		transform.position = transform.position + (transform.forward * travelSpeed);
     }
 
     Vector3 RandomLocation(float Radius)
     {
+		//	Makes a random angle between 0 and 360, and trigs it to the Radius
         float distFromTarget = Random.Range(Radius / 2, Radius);
         float randAngle = Random.Range(0, 360f) * Mathf.Deg2Rad;
         return new Vector3(Mathf.Sin(randAngle) * distFromTarget, 0, Mathf.Cos(randAngle) * distFromTarget);

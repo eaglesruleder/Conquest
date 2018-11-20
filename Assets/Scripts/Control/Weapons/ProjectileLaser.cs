@@ -3,41 +3,90 @@ using System.Collections;
 
 public class ProjectileLaser : Projectile {
 
-    LineRenderer drawEffect;
-    public Color hue = new Color(0.1f, 0.75f, 1f, 0.5f);
-    public float width = 0.2f;
+    //	ProjectileLaser Values
+	Loadable_Projectile.LP_Laser loadableLaser
+		{get{return (Loadable_Projectile.LP_Laser)loadable;}}
+	internal bool verticalSlide { get { return loadableLaser.verticalSlide; } }
+	internal float slideDist { get { return loadableLaser.slideDist; } }
 
-    public override void Build(PlayerControlled Target, Unit Launcher, Vector3 FireDirection, int Damage, float[] ArmourBonus)
+
+	//	Local variables
+	internal LineRenderer drawEffect;
+	internal float currentWidth;
+	internal Vector3 slide = Vector3.zero;
+	internal Vector3 slideShift = Vector3.zero;
+	
+	public override Projectile SetProjectile(Loadable_Projectile loading)
+	{
+		base.SetProjectile(loading);
+
+		//	Add a line renderer
+		drawEffect = loadableLaser.line.AddComponent(gameObject);
+		drawEffect.useWorldSpace = true;
+		drawEffect.SetVertexCount(2);
+
+		return this;
+	}
+
+    public override void Initialise(PlayerControlled Target, PlayerControlled Launcher, int Damage, float[] ArmourBonus)
     {
-        base.Build(Target, Launcher, FireDirection, Damage, ArmourBonus);
+        base.Initialise(Target, Launcher, Damage, ArmourBonus);
 
-        drawEffect = gameObject.AddComponent<LineRenderer>();
-        drawEffect.useWorldSpace = true;
-        drawEffect.material = new Material(Shader.Find("Unlit/Texture"));
-        drawEffect.material.color = hue;
-        drawEffect.SetWidth(width, width);
-        drawEffect.SetVertexCount(2);
-        drawEffect.SetPosition(0, transform.position);
-        drawEffect.SetPosition(1, target.transform.position);
+		//	Determine slide direction
+		slide = Vector3.Cross(target.transform.position - transform.position, (verticalSlide) ? transform.right : transform.up);
+		slide.Normalize();
+		slide *= slideDist;
 
+		//	Set the Launcher as the Parent (This can be overridden after the initialise)
+		transform.parent = launcher.transform;
+
+		//	Reset and apply starting width
+		currentWidth = loadableLaser.line.width;
+		drawEffect.SetWidth(currentWidth, currentWidth);
+
+		//	Reset and apply starting slide
+		slideShift = (slide / 2) * -1;
+		drawEffect.SetPosition(0, transform.position);
+		drawEffect.SetPosition(1, target.transform.position + slideShift);
+
+		//	Determine damage position
         Vector3 collisionPosition = target.transform.position;
         Collider targetCollider = target.GetComponent<Collider>();
-        Ray ray = new Ray(transform.position, target.transform.position - transform.position);
-        float dist = Vector3.Distance(target.transform.position, transform.position);
+		Ray ray = new Ray(transform.position, target.transform.position - transform.position);
+		float dist = Vector3.Distance(target.transform.position, transform.position);
         RaycastHit rayOut;
         if(targetCollider.Raycast(ray, out rayOut, dist))
         {
             collisionPosition = rayOut.point;
         }
+
+		//	Hit the target (instant)
         target.Damage(damage, ArmourBonus, collisionPosition);
+    }
+
+    public override void EndNow()
+    {
+        currentWidth = 0f;
+        base.EndNow();
     }
 
     void Update()
     {
-        width /= 2;
-        drawEffect.SetWidth(width, width);
+		//	Increment and apply width
+		currentWidth -= currentWidth * Time.deltaTime / life;
+		drawEffect.SetWidth(currentWidth, currentWidth);
+
+
+		//	Increment and apply slide
+		slideShift += slide * Time.deltaTime / life;
+		drawEffect.SetPosition(0, transform.position);
+		if(target)
+		{
+			drawEffect.SetPosition(1, target.transform.position + slideShift);
+		}
     }
 
+	//	Override OnTriggerEnter to do nothing just in case
     public override void OnTriggerEnter(Collider hit)
     {}
 }

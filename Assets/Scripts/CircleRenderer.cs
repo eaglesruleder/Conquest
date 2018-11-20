@@ -12,8 +12,8 @@ public class CircleRenderer : MonoBehaviour {
     {
         edgeRenderer = gameObject.AddComponent<LineRenderer>();
         edgeRenderer.useWorldSpace = false;
-        edgeRenderer.material = new Material(Shader.Find("Unlit/Texture"));
-        edgeRenderer.material.color = new Color(1f, 0.92f, 0.016f, 0.5f);
+		edgeRenderer.material = new Material(Shader.Find("Unlit/Color"));
+		edgeRenderer.material.color = new Color(1f, 1f, 1f);
         edgeRenderer.SetWidth(0.2f, 0.2f);
     }
 
