@@ -49,6 +49,7 @@
      <Compile Include="Assets\Scripts\Camera\PCSelector.cs" />
      <Compile Include="Assets\Scripts\Camera\PlayerControl.cs" />
      <Compile Include="Assets\Scripts\CircleRenderer.cs" />
+     <Compile Include="Assets\Scripts\Control\Console.cs" />
      <Compile Include="Assets\Scripts\Control\Environment\Planet.cs" />
      <Compile Include="Assets\Scripts\Control\Environment\PlanetSlot.cs" />
      <Compile Include="Assets\Scripts\Control\Environment\Recource.cs" />
@@ -64,8 +65,8 @@
      <Compile Include="Assets\Scripts\Control\Weapons\Weapon.cs" />
      <Compile Include="Assets\Scripts\Control\Weapons\WeaponHanger.cs" />
      <Compile Include="Assets\Scripts\Formation.cs" />
-     <Compile Include="Assets\Scripts\GUI\Extendible.cs" />
      <Compile Include="Assets\Scripts\GUI\ExtendibleManager.cs" />
+     <Compile Include="Assets\Scripts\GUI\GUIMapManager\Extendible.cs" />
      <Compile Include="Assets\Scripts\GUI\GUISelectionManager.cs" />
      <Compile Include="Assets\Scripts\GUI\GUISelectionManager\GUIAllSelectedItem.cs" />
      <Compile Include="Assets\Scripts\GUI\GUISelectionManager\GUIAllSelectedUnits.cs" />
@@ -94,17 +95,11 @@
      <Compile Include="Assets\Scripts\Global\Loadable\Spawn.cs" />
      <Compile Include="Assets\Scripts\Global\PlayerManager.cs" />
      <Compile Include="Assets\Scripts\Global\Technology.cs" />
- <Reference Include="UnityEngine.Advertisements">
- <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Advertisements/UnityEngine.Advertisements.dll</HintPath>
- </Reference>
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.Networking">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.Analytics">
- <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/UnityAnalytics/UnityEngine.Analytics.dll</HintPath>
  </Reference>
  <Reference Include="Mono.Cecil">
  <HintPath>C:/Program Files/Unity/Editor/Data/Managed/Mono.Cecil.dll</HintPath>

@@ -60,6 +60,8 @@ public class ProjectileFighter : Projectile {
 
     public override void OnTriggerEnter(Collider hit)
     {
+		Console.Function_Instance f = Console.Start ("ProjectileFighter", "OnTriggerEnter");
+
         if(travelReturn && hit.GetComponent<PlayerControlled>())
         {
             if(hit.GetComponent<PlayerControlled>().Equals(launcher))
@@ -67,57 +69,70 @@ public class ProjectileFighter : Projectile {
                 EndNow();
             }
         }
+
+		f.End ();
     }
 
     void Update()
     {
-		//	dest is a world position, 
-		//	Meanwhile targetLocation is a 'localposition' to dest
+		Console.Function_Instance f = Console.Start ("ProjectileFighter", "Update");
 
-		//	If there is a target, position around the target else the launcher	ADD	If there is no target and we are returning add nothing, else add the targetLocation
-		Vector3 dest = ((target) ? target.transform.position : launcher.transform.position) + ((!target && travelReturn) ? Vector3.zero : targetLocation);
+		Vector3 dest = Vector3.right * ((Time.time % 2 == 0) ? 1 : -1);
+		if(launcher)
+		{
+			//	dest is a world position, 
+			//	Meanwhile targetLocation is a 'localposition' to dest
 
-        // If nearby the target dest find new location
-        if (Vector3.Distance(dest, transform.position) < travelSpeed)
-        {
-			targetLocation = (target) ? RandomLocation(engageDistance) : RandomLocation(travelRadius);
+			//	If there is a target, position around the target else the launcher	ADD	If there is no target and we are returning add nothing, else add the targetLocation
+			dest = ((target) ? target.transform.position : launcher.transform.position) + ((!target && travelReturn) ? Vector3.zero : targetLocation);
 
-			/*BUGGED //	If time to return to Launcher is less than time remaining
-			if((Vector3.Distance(launcher.transform.position, transform.position) / (loadableFighter.travelSpeed / 100)) >= (travelStart + loadableFighter.life - Time.time))
-			{
-				//	Set to return
-				travelReturn = true;
+	        // If nearby the target dest find new location
+	        if (Vector3.Distance(dest, transform.position) < travelSpeed)
+	        {
+				targetLocation = (target) ? RandomLocation(engageDistance) : RandomLocation(travelRadius);
 
-				//	And if there is not a target
-				if(!target)
+				/*BUGGED //	If time to return to Launcher is less than time remaining
+				if((Vector3.Distance(launcher.transform.position, transform.position) / (loadableFighter.travelSpeed / 100)) >= (travelStart + loadableFighter.life - Time.time))
 				{
-					//	Overwrite dest parameter
-					dest = launcher.transform.position;
-				}
-			}*/
-        }
+					//	Set to return
+					travelReturn = true;
 
-        // If target and fire ready
-        if(target && pause < Time.time)
-        {
-            // If in firing range
-            if(Vector3.Distance(target.transform.position, transform.position) < engageDistance)
-            {
-                // Fire
-                Projectile tempBullet = (Projectile) SelectableLoadout.Forge<Projectile>(fighterProjectileID);
-                tempBullet.transform.position = transform.position;
-                tempBullet.transform.rotation = transform.rotation;
-                tempBullet.Initialise(target, launcher, damage, armourBonus);
+					//	And if there is not a target
+					if(!target)
+					{
+						//	Overwrite dest parameter
+						dest = launcher.transform.position;
+					}
+				}*/
+	        }
 
-				//	Set the Lasers parent to this
-				tempBullet.transform.parent = transform;
-                pause = Time.time + firerate;
-            }
-        }
+	        // If target and fire ready
+	        if(target && pause < Time.time)
+	        {
+	            // If in firing range
+	            if(Vector3.Distance(target.transform.position, transform.position) < engageDistance)
+	            {
+	                // Fire
+	                Projectile tempBullet = (Projectile) SelectableLoadout.Forge<Projectile>(fighterProjectileID);
+	                tempBullet.transform.position = transform.position;
+	                tempBullet.transform.rotation = transform.rotation;
+	                tempBullet.Initialise(target, launcher, damage, armourBonus);
+
+					//	Set the Lasers parent to this
+					tempBullet.transform.parent = transform;
+	                pause = Time.time + firerate;
+	            }
+	        }
+		}
 
         // Apply move
-		transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, dest - transform.position, Time.deltaTime * 2, 0.0F), Vector3.up);
+		if((dest - transform.position).normalized != transform.forward)
+		{
+			transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, dest - transform.position, Time.deltaTime * 2, 0.0F), Vector3.up);
+		}
 		transform.position = transform.position + (transform.forward * travelSpeed);
+		
+		f.End ();
     }
 
     Vector3 RandomLocation(float Radius)

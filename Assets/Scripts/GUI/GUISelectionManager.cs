@@ -33,13 +33,13 @@ public class GUISelectionManager : MonoBehaviour {
 		thisGUISelectionManager.AllSelectedUnitsPanel.UpdatePanel(PCSelector.selectedObjects);
 
         // Update is applies when selection changes, so on new items
-		if(PCSelector.PlayerOnScreen.Count == 1)
+		if(PCSelector.selectedObjects.Count == 1)
         {
 			thisGUISelectionManager.SelectedUnitBtn.SetActive(true);
 			thisGUISelectionManager.AllSelectedUnitsBtn.SetActive(false);
 			thisGUISelectionManager.OpenPanel(thisGUISelectionManager.SelectedUnitPanel.gameObject);
         }
-		else if (PCSelector.PlayerOnScreen.Count > 1)
+		else if (PCSelector.selectedObjects.Count > 1)
         {
 			thisGUISelectionManager.SelectedUnitBtn.SetActive(true);
 			thisGUISelectionManager.AllSelectedUnitsBtn.SetActive(true);

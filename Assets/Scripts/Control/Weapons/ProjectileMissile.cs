@@ -11,6 +11,8 @@ public class ProjectileMissile : Projectile {
 
     void Update()
     {
+		Console.Function_Instance f = Console.Start ("ProjectileMissile", "Update");
+
 		//	Determine thrust direction
         Vector3 targetAim = (target) ? target.transform.position - transform.position : transform.forward;
         Vector3 thrustDirection = Vector3.RotateTowards(transform.forward, targetAim, Time.deltaTime * turnMagnitude, 0.0F);
@@ -18,5 +20,7 @@ public class ProjectileMissile : Projectile {
 		//	Apply and push forward
         transform.rotation = Quaternion.LookRotation(thrustDirection);
         transform.position += transform.forward * velocity;
+
+		f.End ();
     }
 }

@@ -84,7 +84,7 @@ public class PCSelector : MonoBehaviour{
 		Vector2 mouseCur = Input.mousePosition;
 		
 		//	If we are hovering over the GUI, and the 
-		if (EventSystem.current.IsPointerOverGameObject() && !mouseEnd.Equals(Vector2.zero))
+		if (EventSystem.current.IsPointerOverGameObject())
 		{
 			if(!mouseEnd.Equals(Vector2.zero))
 			{
@@ -214,121 +214,129 @@ public class PCSelector : MonoBehaviour{
 		//	If right is down, and we are not dragging left
 		else if (Input.GetMouseButton(1) && !leftDragging)
 		{
-			//	If this is a new event
-			if(mouseStart.Equals(Vector2.zero))
+			//	Process order-right click commands
+			if(selectedObject)
 			{
-				//	Start as a new event
-				mouseStart = mouseCur;
-				rightDragging = true;
-			}
-
-			//	Else if we are not yet dragging but the distance is > 5
-			else if(mouseEnd.Equals(Vector2.zero) && Vector2.Distance(mouseStart, mouseCur) > 5)
-			{
-				mouseEnd = mouseCur;
-
-				//	Create a ray aimed at mouse
-				Ray ray = Camera.main.ScreenPointToRay(mouseStart);
-				
-				//	Create a plane at selectedObject height aimed up
-				Plane collPlane = new Plane(Vector3.up, selectedObject.transform.position);
-				
-				//	Shoot the ray at the plane, to determine location
-				float distance = 0f;
-				if (collPlane.Raycast(ray, out distance))
+				//	If this is a new event
+				if(mouseStart.Equals(Vector2.zero))
 				{
-					vecRightStart = ray.GetPoint(distance);
+					//	Start as a new event
+					mouseStart = mouseCur;
+					rightDragging = true;
 				}
-				
-				//	Apply
-				UpdateMoveGUI(vecRightStart, selectedObject);
-				ActivateMoveGUI(true);
-			}
 
-			//	Else this is a drag event
-			else if(!mouseEnd.Equals(Vector2.zero))
-			{
-				mouseEnd = mouseCur;
-
-				//	Create a normal from the camera, at the startPosition, thats perfectly vertical
-				Vector3 cameraPos = Camera.main.transform.position;
-				Vector3 planeNormal = new Vector3(cameraPos.x - vecRightStart.x, 0f, cameraPos.z - vecRightStart.z).normalized;
-
-				//	Create a plane thats aimed at the camera to point at
-				Plane collHeightPlane = new Plane(planeNormal, vecRightStart);
-
-				//	Create a ray, at start-width, and current-height
-				Ray rayHeight = Camera.main.ScreenPointToRay(new Vector2 (mouseStart.x, mouseEnd.y));
-
-				//	Shoot the ray at the plane, to determine location
-				float distance = 0f;
-				if (collHeightPlane.Raycast(rayHeight, out distance))
+				//	Else if we are not yet dragging but the distance is > 5
+				else if(mouseEnd.Equals(Vector2.zero) && Vector2.Distance(mouseStart, mouseCur) > 5)
 				{
-					Vector3 testPos = rayHeight.GetPoint(distance);
-					//	If the position is between -20 and 20 apply it
-					if(20 > testPos.y && testPos.y > -20)
+					mouseEnd = mouseCur;
+
+					//	Create a ray aimed at mouse
+					Ray ray = Camera.main.ScreenPointToRay(mouseStart);
+					
+					//	Create a plane at selectedObject height aimed up
+					Plane collPlane = new Plane(Vector3.up, selectedObject.transform.position);
+					
+					//	Shoot the ray at the plane, to determine location
+					float distance = 0f;
+					if (collPlane.Raycast(ray, out distance))
 					{
-						vecRightEnd = testPos;
+						vecRightStart = ray.GetPoint(distance);
 					}
+					
+					//	Apply
+					UpdateMoveGUI(vecRightStart, selectedObject);
+					ActivateMoveGUI(true);
 				}
 
-				//	Apply
-				UpdateMoveGUI(vecRightEnd, selectedObject);
+				//	Else this is a drag event
+				else if(!mouseEnd.Equals(Vector2.zero))
+				{
+					mouseEnd = mouseCur;
+
+					//	Create a normal from the camera, at the startPosition, thats perfectly vertical
+					Vector3 cameraPos = Camera.main.transform.position;
+					Vector3 planeNormal = new Vector3(cameraPos.x - vecRightStart.x, 0f, cameraPos.z - vecRightStart.z).normalized;
+
+					//	Create a plane thats aimed at the camera to point at
+					Plane collHeightPlane = new Plane(planeNormal, vecRightStart);
+
+					//	Create a ray, at start-width, and current-height
+					Ray rayHeight = Camera.main.ScreenPointToRay(new Vector2 (mouseStart.x, mouseEnd.y));
+
+					//	Shoot the ray at the plane, to determine location
+					float distance = 0f;
+					if (collHeightPlane.Raycast(rayHeight, out distance))
+					{
+						Vector3 testPos = rayHeight.GetPoint(distance);
+						//	If the position is between -20 and 20 apply it
+						if(20 > testPos.y && testPos.y > -20)
+						{
+							vecRightEnd = testPos;
+						}
+					}
+
+					//	Apply
+					UpdateMoveGUI(vecRightEnd, selectedObject);
+				}
 			}
 		}
 
 		else if (rightDragging)
 		{
-			//	If a non-dragging event, process as a raycast
-			//	NOTE: If no target is found, then use to discover move point
-			if(mouseEnd.Equals(Vector2.zero))
+			//	Process order-right click commands
+			if(selectedObject)
 			{
-				//	Create a ray at the mouse
-				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-				RaycastHit hitOut;
-
-				//	If we hit a player controlled
-				if (Physics.Raycast(ray, out hitOut))
+				//	If a non-dragging event, process as a raycast
+				//	NOTE: If no target is found, then use to discover move point
+				if(mouseEnd.Equals(Vector2.zero))
 				{
-					PlayerControlled tempObj = hitOut.collider.gameObject.GetComponent<PlayerControlled>();
-					if (tempObj != null)
+					//	Create a ray at the mouse
+					Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+					RaycastHit hitOut;
+
+					//	If we hit a player controlled
+					if (Physics.Raycast(ray, out hitOut))
 					{
-						//	Determine if enemy or 'alt' override
-						if(PlayerManager.ThisPlayerID != tempObj.playerID || (Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.LeftAlt)))
+						PlayerControlled tempObj = hitOut.collider.gameObject.GetComponent<PlayerControlled>();
+						if (tempObj != null)
 						{
-							//	For each selected update target
-							foreach (PlayerControlled i in selectedObjects)
+							//	Determine if enemy or 'alt' override
+							if(PlayerManager.ThisPlayerID != tempObj.playerID || (Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.LeftAlt)))
 							{
-								//	As long as not self targeting
-								if (!i.Equals(tempObj))
+								//	For each selected update target
+								foreach (PlayerControlled i in selectedObjects)
 								{
-									i.SetTarget(tempObj);
+									//	As long as not self targeting
+									if (!i.Equals(tempObj))
+									{
+										i.SetTarget(tempObj);
+									}
 								}
 							}
 						}
 					}
-				}
-				//	If we didnt get anything
-				else
-				{
-					//	Get plane at selectedObject height
-					Plane heightPlane = new Plane(Vector3.up, selectedObject.transform.position);
-
-					//	And set move position to collision position
-					float distance = 0f;
-					if (heightPlane.Raycast(ray, out distance))
+					//	If we didnt get anything
+					else
 					{
-						vecRightEnd = ray.GetPoint(distance);
+						//	Get plane at selectedObject height
+						Plane heightPlane = new Plane(Vector3.up, selectedObject.transform.position);
+
+						//	And set move position to collision position
+						float distance = 0f;
+						if (heightPlane.Raycast(ray, out distance))
+						{
+							vecRightEnd = ray.GetPoint(distance);
+						}
 					}
 				}
-			}
 
-			//	If move-to position is not empty
-			if(!vecRightEnd.Equals(Vector3.zero))
-			{
-				//	Apply
-				Move(vecRightEnd);
-				ActivateMoveGUI(false);
+				//	If move-to position is not empty
+				if(!vecRightEnd.Equals(Vector3.zero))
+				{
+					//	Apply
+					Move(vecRightEnd);
+					ActivateMoveGUI(false);
+				}
 			}
 
 			//	Empty out variables

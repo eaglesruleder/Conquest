@@ -11,12 +11,6 @@ public class ProjectileArc : ProjectileLaser {
 	internal float range { get { return loadableArc.range; } }
 
 	internal bool isSource;
-
-	//	Local variables
-    LineRenderer drawEffect;
-    float currentWidth;
-	Vector3 slide = Vector3.zero;
-	Vector3 slideShift = Vector3.zero;
 	
 	public override Projectile SetProjectile(Loadable_Projectile loading)
 	{

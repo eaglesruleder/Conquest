@@ -37,6 +37,8 @@ public class WeaponHanger : Weapon
 	
 	internal virtual void Update()
 	{
+		Console.Function_Instance f = Console.Start ("WeaponHanger", "Update");
+
 		//	Check each fighter slot
 		for(int i = 0; i < squadrons.Length; i++)
 		{
@@ -66,6 +68,8 @@ public class WeaponHanger : Weapon
                 }
 			}
 		}
+
+		f.End ();
 	}
 
 	public override void Fire(bool firing)

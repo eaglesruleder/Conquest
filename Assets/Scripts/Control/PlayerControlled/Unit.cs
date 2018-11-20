@@ -1,9 +1,9 @@
 ﻿using UnityEngine; 
 using System.Collections.Generic;
 
-public class Unit : PlayerControlled {
-
-    static Vector3 posNull = new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
+public class Unit : PlayerControlled
+{
+	static Vector3 posNull = new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
 
     //Hull variables
 	Loadable_Hull loadable;
@@ -114,8 +114,8 @@ public class Unit : PlayerControlled {
 	Technology shipTech;
 	public int currentKills = 0;
 
-    public List<Vector3> destPositions = new List<Vector3>();
-    Vector3 targetPosition = posNull;
+	public List<Vector3> destPositions = new List<Vector3>();
+	Vector3 targetPosition = posNull;
 	
 	bool aimForward = false;
 	public PlayerControlled targetObj = null;
@@ -178,7 +178,7 @@ public class Unit : PlayerControlled {
 		body.drag = 1f;
 		body.angularDrag = 1f;
 		body.useGravity = false;
-
+		
         return this;
     }
 
@@ -197,15 +197,11 @@ public class Unit : PlayerControlled {
 		
 		foreach (Loadout_Unit.WeaponPos wp in loadout.weapons)
         {
-			Weapon temp;
-			if (SelectableLoadout.ForgeAvailable<Weapon>(wp.weaponID))
-			{
-				temp = (Weapon)SelectableLoadout.Forge<Weapon>(wp.weaponID);
-			}
-			else
+			if (!SelectableLoadout.ForgeAvailable<Weapon>(wp.weaponID))
 			{
 				throw new UnityEngine.UnityException("weaponID " + wp.weaponID + " declared but not found on PlayerLoadout.UnitLoadout " + loadout.Loadout_ID);
 			}
+			Weapon temp = (Weapon)SelectableLoadout.Forge<Weapon>(wp.weaponID);
 			
 			points -= temp.points;
 			if(points < 0)
@@ -229,23 +225,22 @@ public class Unit : PlayerControlled {
 
 	void Update()
 	{
-		AimTurrets();
+		Console.Function_Instance f = Console.Start ("Unit", "Update");
+		//	//	//	BEGIN WITH AIMING	//	//	//
 
-		MoveToPosition();
-	}
-
-	void AimTurrets()
-	{
+		f.Start_Flag ("Aim");
 		// Search for targets in range
 		if(!targetObj)
 		{
 			targetObj = null;
-			foreach (Collider c in Physics.OverlapSphere(transform.position, engageDistance))
+			Collider[] colliders = Physics.OverlapSphere(transform.position, engageDistance);
+
+			foreach (Collider c in colliders)
 			{
 				PlayerControlled temp = c.GetComponent<PlayerControlled>();
 				if (temp)
 				{
-					// In not on player team set as target
+					// If not on player team set as target
 					if (temp.playerID != playerID)
 					{
 						SetTarget(temp);
@@ -256,57 +251,66 @@ public class Unit : PlayerControlled {
 		}
 		
 		// If not zeroed, or there is a target
-		bool firing = false;
 		if (!aimForward || targetObj)
 		{
-			// if there is a target, aim at relative position, else forward
-			Vector3 targetAim = (targetObj) ? targetObj.transform.position - transform.position : transform.forward;
+			//	Prepare result vars
+			Vector3 pitchDir = Vector3.zero;
+			bool firing = false;
 			
-			// Apply to targeting object
-			Vector3 pitchDir = Vector3.RotateTowards(pitchObj.transform.forward, targetAim, Time.deltaTime * 2, 0.0F);
-			pitchObj.transform.rotation = Quaternion.LookRotation(pitchDir, pitchObj.transform.up);
-			
-			// Determine angle outcome
-			if (Vector3.Angle(pitchObj.transform.forward, targetAim) < 5)
+			//	If no target we are zeroing
+			if(!targetObj)
 			{
-				// If there is a target in range, fire
-				if (targetObj)
+				//	If we are not straight
+				if(!pitchObj.transform.rotation.Equals(transform.rotation))
 				{
-					if(Vector3.Distance(targetObj.transform.position, transform.position) <= engageDistance)
-					{
-						firing = true;
-					}
+					//	Straighten up
+					pitchDir = Vector3.RotateTowards(pitchObj.transform.forward, transform.forward, Time.deltaTime * 2, 0.0F);
+					pitchObj.transform.rotation = Quaternion.LookRotation(pitchDir, transform.up);
 				}
-				// Otherwise if no target we must be aiming forward
-				else
+				//	Then determine if we are straight yet
+				if(pitchObj.transform.rotation.Equals(transform.rotation))
 				{
 					aimForward = true;
 				}
 			}
-			//	Otherwise we arent aiming forward
+			//	Else we're aiming at the target
 			else
 			{
+				//	So we arent aiming forward
 				aimForward = false;
+				
+				//	Aim at the target
+				pitchDir = Vector3.RotateTowards(pitchObj.transform.forward, targetObj.transform.position - transform.position, Time.deltaTime * 2, 0.0F);
+				pitchObj.transform.rotation = Quaternion.LookRotation(pitchDir, transform.up);
+				
+				//	If within 5deg then fire
+				firing = Vector3.Angle(pitchObj.transform.forward, targetObj.transform.position - transform.position) < 5;
 			}
 
-			//	Apply
-			foreach (Weapon weapon in weapons)
+			//	If pitch dir is not zeroed then we have reaimed
+			bool aiming = !pitchDir.Equals(Vector3.zero);
+
+			//	Apply to all weapons
+			foreach (Weapon w in weapons)
 			{
-				weapon.AimTarget(pitchDir);
-				weapon.Fire(firing);
+				w.Fire(firing);
+				if(aiming)
+				{
+					w.AimTarget(pitchDir);
+				}
 			}
 		}
-	}
+		f.End_Flag ("Aim");
 
-	void MoveToPosition()
-	{
+		//	//	//	Move to posiiton	//	//	//
+		f.Start_Flag ("Move");
 		// If near targetPosition, null targetPosition
 		if(Vector3.Distance(transform.position, targetPosition) <= stopDist)
 		{
 			destPositions.Remove(targetPosition);
 			targetPosition = posNull;
 		}
-		
+
 		// If no target destination exists
 		if(targetPosition.Equals(posNull))
 		{
@@ -357,14 +361,14 @@ public class Unit : PlayerControlled {
 		{
 			//	Get rel position
 			Vector3 targetDir = targetPosition - transform.position;
-
+			
 			//	If the angle is greater then left/right (aka behind) limit to left/right
 			//	This stops reverse thrust
 			float engAngle = Vector3.Angle(transform.forward, targetDir);
 			if (engAngle >= 90)
 				engAngle = 90;
 			engAngle *= Mathf.Deg2Rad;
-
+			
 			//	Move to this + (directipn * angle of thrust * engine)
 			GetComponent<Rigidbody>().MovePosition(transform.position + ((targetPosition - transform.position).normalized * Mathf.Cos(engAngle) * engine));
 			
@@ -376,6 +380,9 @@ public class Unit : PlayerControlled {
 		{
 			transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, new Vector3(transform.forward.x, 0, transform.forward.z), Time.deltaTime, 0.0F), Vector3.up);
 		}
+
+		f.End_Flag ("Move");
+		f.End ();
 	}
 
     public override void SetTarget(PlayerControlled Target)
@@ -390,10 +397,17 @@ public class Unit : PlayerControlled {
 	// Add a new position, or make a single new position to the list
 	public override void SetMove(Vector3 Position, bool Increment)
 	{
+		if(Position.y > 20)
+		{
+			Position.y = 20;
+		}
+		else if(Position.y < -20)
+		{
+			Position.y = -20;
+		}
+
 		int layer = 1 << LayerMask.NameToLayer("Environment");
-
 		Collider[] col = Physics.OverlapSphere (Position, loadable.Loadable_Collider.height, layer);
-
 		foreach(Collider c in col)
 		{
 			Planet p = c.GetComponent<Planet>();
@@ -469,6 +483,8 @@ public class Unit : PlayerControlled {
 
     void OnCollisionStay(Collision hit)
     {
+		Console.Function_Instance f = Console.Start ("Unit", "OnCollisionStay");
+
 		//	Find position of collision
         Vector3 targetDir = hit.transform.position - transform.position;
         float hitAngle = Vector3.Angle(transform.right, targetDir);
@@ -486,6 +502,8 @@ public class Unit : PlayerControlled {
 
 		//	Apply
         transform.position = Vector3.MoveTowards(transform.position, newPos, engine);
+
+		f.End ();
     }
 
     public override void EndSelf()
@@ -505,4 +523,73 @@ public class Unit : PlayerControlled {
 
         base.EndSelf();
     }
+
+//	public class Command_Unit
+//	{
+//		public const int NULL_MOVE = 0;
+//		public const int MOVE = 1;
+//
+//		public const int NULL_ATTACK = 2;
+//		public const int ATTACK = 3;
+//
+//		public const int ATTACK_MOVE = 4;
+//		public const int PATROL = 5;
+//		public const int DEFEND_UNIT = 6;
+//		public const int DEFEND_LOC = 7;
+//
+//		//	AKA Has specific destination
+//		public bool isMove
+//			{ get { return
+//					commandID == NULL_MOVE
+//				||	commandID == MOVE
+//				||	commandID == ATTACK_MOVE
+//				||	commandID == PATROL;
+//			}}
+//
+//		//	AKA Attack AND follow
+//		public bool isAttack
+//		{ get { return
+//					commandID == NULL_ATTACK
+//				||	commandID == ATTACK
+//				||	commandID == PATROL
+//				||	commandID == ATTACK_MOVE;
+//			}}
+//
+//		//	AKA Attack in range of defend
+//		public bool isDefend
+//		{ get { return
+//					commandID == DEFEND_UNIT
+//				||	commandID == DEFEND_LOC;
+//			}}
+//
+//		public int commandID;
+//		public Vector3 position;
+//		public PlayerControlled target;
+//
+//		public Vector3 to;
+//		public Vector3 from;
+//
+//		private Command_Unit()
+//		{
+//			commandID = -1;
+//		}
+//
+//		public static Command_Unit Null_Move(Vector3 To)
+//		{
+//			Command_Unit res = new Command_Unit ();
+//			res.commandID = NULL_MOVE;
+//			res.position = To;
+//			res.to = To;
+//			return res;
+//		}
+//
+//		public static Command_Unit Move(Vector3 To)
+//		{
+//			Command_Unit res = new Command_Unit ();
+//			res.commandID = MOVE;
+//			res.position = To;
+//			res.to = To;
+//			return res;
+//		}
+//	}
 }

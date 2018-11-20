@@ -1,13 +1,13 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Control\Weapons\ProjectileFighter.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Global\Loadable\SelectableLoadout.cs">
     <Files>
-      <File FileName="Assets\Scripts\Control\Weapons\ProjectileFighter.cs" Line="111" Column="5" />
+      <File FileName="Assets\Scripts\Control\Weapons\ProjectileFighter.cs" Line="80" Column="65" />
+      <File FileName="Assets\Scripts\GUI\GUISelectionManager.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Camera\PCSelector.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\CircleRenderer.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Control\Weapons\ProjectileLaser.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Global\Loadable\Serializable_LineRenderer.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Control\PlayerControlled\Unit.cs" Line="377" Column="183" />
+      <File FileName="Assets\Scripts\GUI\GUISelectionManager\GUIAllSelectedUnits.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Control\Weapons\ProjectileArc.cs" Line="13" Column="25" />
+      <File FileName="Assets\Scripts\Global\Loadable\SelectableLoadout.cs" Line="11" Column="5" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
