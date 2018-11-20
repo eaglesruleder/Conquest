@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 50fd7feb5ce98894cb33dea9d4e6bf98
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - destMarker: {fileID: 100000, guid: cfc087fb27d6137458192e8e60f2990e, type: 2}
+  - weaponLocations: {instanceID: 0}
+  - hull: {instanceID: 0}
+  - playerTech: {instanceID: 0}
+  - targetObj: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
