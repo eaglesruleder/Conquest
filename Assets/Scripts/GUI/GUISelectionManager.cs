@@ -16,14 +16,10 @@ public class GUISelectionManager : MonoBehaviour {
 	void Awake()
 	{
 		if(thisGUISelectionManager == null)
-		{
-			DontDestroyOnLoad(this);
 			thisGUISelectionManager = this;
-		}
+		
 		else
-		{
 			Destroy(this.gameObject);
-		}
 	}
 
     public static void UpdatePanels()

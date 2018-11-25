@@ -451,7 +451,9 @@ public class Unit : PlayerControlled
 		Destroy (hitEffect.gameObject, 1f);
 		
 		//Setting particle speed and particle-count as per projectile damage
-		hitEffect.startSpeed = damage / 10;
+		ParticleSystem.MainModule main = hitEffect.main;
+		main.startSpeed = damage / 10;
+
 		hitEffect.Emit(damage * damage);
 		
 		//Modify the damage as per shield for unit damaging

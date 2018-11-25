@@ -14,7 +14,9 @@ public class CircleRenderer : MonoBehaviour {
         edgeRenderer.useWorldSpace = false;
 		edgeRenderer.material = new Material(Shader.Find("Unlit/Color"));
 		edgeRenderer.material.color = new Color(1f, 1f, 1f);
-        edgeRenderer.SetWidth(0.2f, 0.2f);
+
+		edgeRenderer.startWidth = 0.2f;
+		edgeRenderer.endWidth = 0.2f;
     }
 
     public void SetRadius(float Radius)
@@ -25,7 +27,8 @@ public class CircleRenderer : MonoBehaviour {
 
         bool pass = cir < maxEdgeLen * minEdges;
         int edges = (pass) ? minEdges : (int) Mathf.Ceil(cir / maxEdgeLen);
-        edgeRenderer.SetVertexCount(edges + 1);
+
+		edgeRenderer.positionCount = edges + 1;
 
         float angle = 2 * Mathf.PI / edges;
         for (int i = 0; i < edges; i++)

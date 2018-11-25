@@ -55,10 +55,15 @@ public class PCSelector : MonoBehaviour{
 
         drawToMove = gameObject.AddComponent<LineRenderer>();
         drawToMove.useWorldSpace = true;
+
         drawToMove.material = new Material(Shader.Find("Unlit/Color"));
         drawToMove.material.color = new Color(1f, 1f, 1f);
-        drawToMove.SetWidth(0.2f, 0.2f);
-        drawToMove.SetVertexCount(3);
+
+		drawToMove.startWidth = 0.2f;
+		drawToMove.endWidth = 0.2f;
+
+		drawToMove.positionCount = 3;
+
 
 		//	Create temp object with CircleRenderer attached
         GameObject temp = new GameObject();

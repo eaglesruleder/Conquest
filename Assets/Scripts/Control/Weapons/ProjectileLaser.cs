@@ -23,7 +23,8 @@ public class ProjectileLaser : Projectile {
 		//	Add a line renderer
 		drawEffect = loadableLaser.line.AddComponent(gameObject);
 		drawEffect.useWorldSpace = true;
-		drawEffect.SetVertexCount(2);
+
+		drawEffect.positionCount = 2;
 
 		return this;
 	}
@@ -42,7 +43,9 @@ public class ProjectileLaser : Projectile {
 
 		//	Reset and apply starting width
 		currentWidth = loadableLaser.line.width;
-		drawEffect.SetWidth(currentWidth, currentWidth);
+
+		drawEffect.startWidth = currentWidth;
+		drawEffect.endWidth = currentWidth;
 
 		//	Reset and apply starting slide
 		slideShift = (slide / 2) * -1;
@@ -76,7 +79,9 @@ public class ProjectileLaser : Projectile {
 
 		//	Increment and apply width
 		currentWidth -= currentWidth * Time.deltaTime / life;
-		drawEffect.SetWidth(currentWidth, currentWidth);
+
+		drawEffect.startWidth = currentWidth;
+		drawEffect.endWidth = currentWidth;
 
 
 		//	Increment and apply slide

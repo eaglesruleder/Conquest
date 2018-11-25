@@ -1,7 +1,7 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2008
-
-Project("{9FA8E033-4F03-248F-3A0A-2F304C5C12A5}") = "Conquest", "Assembly-CSharp.csproj", "{B42145EF-8542-2C74-D314-A9A20866F707}"
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "conquest", "Assembly-CSharp.csproj", "{1C0186A8-B5D6-211C-C754-CF1872A27A8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B42145EF-8542-2C74-D314-A9A20866F707}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B42145EF-8542-2C74-D314-A9A20866F707}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B42145EF-8542-2C74-D314-A9A20866F707}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B42145EF-8542-2C74-D314-A9A20866F707}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C0186A8-B5D6-211C-C754-CF1872A27A8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C0186A8-B5D6-211C-C754-CF1872A27A8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C0186A8-B5D6-211C-C754-CF1872A27A8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C0186A8-B5D6-211C-C754-CF1872A27A8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,5 +36,4 @@ Global
 		$3.inheritsScope = text/plain
 		$3.scope = text/plain
 	EndGlobalSection
-
 EndGlobal
