@@ -3,8 +3,10 @@ using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
 
-public class PCSelector : MonoBehaviour{
+using OdWyer.Graphics;
 
+public class PCSelector : MonoBehaviour
+{
 	static PCSelector thisPlayer;
 
 	Dictionary<string, List<PlayerControlled>> onScreen = new Dictionary<string, List<PlayerControlled>> ();
@@ -460,15 +462,15 @@ public class PCSelector : MonoBehaviour{
         drawToMove.SetPosition(2, belowVec);
 
 		//	Set one radius to the ship size at its postion
-        drawFromRad.SetRadius(Selected.GetComponent<CapsuleCollider>().height / 2);
+        drawFromRad.radius = Selected.GetComponent<CapsuleCollider>().height / 2;
         drawFromRad.transform.position = belowVec;
 
 		//	Set one radius to the ships size at target
-        drawToRad.SetRadius(Selected.GetComponent<CapsuleCollider>().height / 2);
+		drawToRad.radius = Selected.GetComponent<CapsuleCollider>().height / 2;
         drawToRad.transform.position = ToPos;
 
 		//	Set one radius to show the radius around the ship to give perspective
-        drawMoveRad.SetRadius(Vector3.Distance(ToPos, belowVec));
+		drawMoveRad.radius = Vector3.Distance(ToPos, belowVec);
         drawMoveRad.transform.position = belowVec;
     }
 

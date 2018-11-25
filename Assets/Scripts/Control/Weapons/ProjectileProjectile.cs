@@ -21,8 +21,6 @@ public class ProjectileProjectile : Projectile {
 
     public virtual void Update()
     {
-		Console.Function_Instance f = Console.Start ("ProjectileProjectile", "Update");
-
 		//	While the target still exists
         if (target)
         {
@@ -43,7 +41,5 @@ public class ProjectileProjectile : Projectile {
 
 		//	Push forward
         transform.position += fireDirection * velocity;
-
-		f.End ();
     }
 }

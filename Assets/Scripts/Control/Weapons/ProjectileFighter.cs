@@ -60,8 +60,6 @@ public class ProjectileFighter : Projectile {
 
     public override void OnTriggerEnter(Collider hit)
     {
-		Console.Function_Instance f = Console.Start ("ProjectileFighter", "OnTriggerEnter");
-
         if(travelReturn && hit.GetComponent<PlayerControlled>())
         {
             if(hit.GetComponent<PlayerControlled>().Equals(launcher))
@@ -69,14 +67,10 @@ public class ProjectileFighter : Projectile {
                 EndNow();
             }
         }
-
-		f.End ();
     }
 
     void Update()
     {
-		Console.Function_Instance f = Console.Start ("ProjectileFighter", "Update");
-
 		Vector3 dest = Vector3.right * ((Time.time % 2 == 0) ? 1 : -1);
 		if(launcher)
 		{
@@ -131,8 +125,6 @@ public class ProjectileFighter : Projectile {
 			transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, dest - transform.position, Time.deltaTime * 2, 0.0F), Vector3.up);
 		}
 		transform.position = transform.position + (transform.forward * travelSpeed);
-		
-		f.End ();
     }
 
     Vector3 RandomLocation(float Radius)

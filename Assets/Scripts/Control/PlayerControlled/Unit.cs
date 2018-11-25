@@ -225,10 +225,7 @@ public class Unit : PlayerControlled
 
 	void Update()
 	{
-		Console.Function_Instance f = Console.Start ("Unit", "Update");
 		//	//	//	BEGIN WITH AIMING	//	//	//
-
-		f.Start_Flag ("Aim");
 		// Search for targets in range
 		if(!targetObj)
 		{
@@ -300,10 +297,8 @@ public class Unit : PlayerControlled
 				}
 			}
 		}
-		f.End_Flag ("Aim");
 
 		//	//	//	Move to posiiton	//	//	//
-		f.Start_Flag ("Move");
 		// If near targetPosition, null targetPosition
 		if(Vector3.Distance(transform.position, targetPosition) <= stopDist)
 		{
@@ -380,9 +375,6 @@ public class Unit : PlayerControlled
 		{
 			transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, new Vector3(transform.forward.x, 0, transform.forward.z), Time.deltaTime, 0.0F), Vector3.up);
 		}
-
-		f.End_Flag ("Move");
-		f.End ();
 	}
 
     public override void SetTarget(PlayerControlled Target)
@@ -485,8 +477,6 @@ public class Unit : PlayerControlled
 
     void OnCollisionStay(Collision hit)
     {
-		Console.Function_Instance f = Console.Start ("Unit", "OnCollisionStay");
-
 		//	Find position of collision
         Vector3 targetDir = hit.transform.position - transform.position;
         float hitAngle = Vector3.Angle(transform.right, targetDir);
@@ -504,8 +494,6 @@ public class Unit : PlayerControlled
 
 		//	Apply
         transform.position = Vector3.MoveTowards(transform.position, newPos, engine);
-
-		f.End ();
     }
 
     public override void EndSelf()

@@ -55,7 +55,6 @@
      <Compile Include="Assets\Scripts\Camera\PCSelector.cs" />
      <Compile Include="Assets\Scripts\Camera\PlayerControl.cs" />
      <Compile Include="Assets\Scripts\CircleRenderer.cs" />
-     <Compile Include="Assets\Scripts\Control\Console.cs" />
      <Compile Include="Assets\Scripts\Control\Environment\Planet.cs" />
      <Compile Include="Assets\Scripts\Control\Environment\PlanetSlot.cs" />
      <Compile Include="Assets\Scripts\Control\Environment\Recource.cs" />
