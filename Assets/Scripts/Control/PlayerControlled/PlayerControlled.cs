@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using OdWyer.Control;
+
 public abstract class PlayerControlled : MonoBehaviour {
 
     // PlayerControlled values

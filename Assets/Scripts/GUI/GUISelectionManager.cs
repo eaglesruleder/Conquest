@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+using OdWyer.Control;
+
 public class GUISelectionManager : MonoBehaviour {
 
 	static GUISelectionManager thisGUISelectionManager;

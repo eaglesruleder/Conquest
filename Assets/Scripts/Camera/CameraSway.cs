@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using OdWyer.Control;
+
 public class CameraSway : MonoBehaviour
 {
 	//	Seperate script designed to allow influence on the camera ONLY in up/down
