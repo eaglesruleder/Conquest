@@ -247,7 +247,7 @@ namespace OdWyer.RTS
 		private void UpdateAiming()
 		{
 			if(!targetObj)
-				SetTarget(FindTarget());
+				FindTarget();
 
 			Vector3 targetAim = transform.forward;
 			if (targetObj)
@@ -270,16 +270,18 @@ namespace OdWyer.RTS
 				w.AimTarget(AimTransform.forward);
 		}
 
-		private PlayerControlled FindTarget()
+		private void FindTarget()
 		{
 			Collider[] colliders = Physics.OverlapSphere(transform.position, EngageDistance);
 			foreach (Collider c in colliders)
 			{
-				PlayerControlled temp = c.GetComponent<PlayerControlled>();
-				if (temp && temp.playerID != playerID)
-					return temp;
+				PlayerControlled pc = c.GetComponent<PlayerControlled>();
+				if (pc && pc.playerID != playerID)
+				{
+					SetTarget(pc);
+					return;
+				}
 			}
-			return null;
 		}
 
 		public override void SetTarget(PlayerControlled target)
