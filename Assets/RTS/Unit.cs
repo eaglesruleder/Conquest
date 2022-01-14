@@ -228,70 +228,6 @@ namespace OdWyer.RTS
 			}
 		}
 
-		public PlayerControlled targetObj = null;
-
-		private Transform _aimTransform = null;
-		private Transform AimTransform
-		{ get {
-			if (!_aimTransform)
-			{
-				_aimTransform = new GameObject("Aim").transform;
-				_aimTransform.SetParent(transform);
-				_aimTransform.localPosition = Vector3.zero;
-				_aimTransform.localRotation = Quaternion.identity;
-			}
-
-			return _aimTransform;
-		}	}
-
-		private void UpdateAiming()
-		{
-			if(!targetObj)
-				FindTarget();
-
-			Vector3 targetAim = transform.forward;
-			if (targetObj)
-				targetAim = (targetObj.transform.position - transform.position).normalized;
-
-			bool aimLock = Vector3.Angle(AimTransform.forward, targetAim) < 5;
-			foreach (Weapon w in weapons)
-				w.Fire(targetObj && aimLock);
-
-			if (aimLock)
-				return;
-
-			AimTransform.rotation = Quaternion.Slerp
-				(AimTransform.rotation
-				,Quaternion.LookRotation(targetAim)
-				,Time.deltaTime * 2
-				);
-
-			foreach (Weapon w in weapons)
-				w.AimTarget(AimTransform.forward);
-		}
-
-		private void FindTarget()
-		{
-			Collider[] colliders = Physics.OverlapSphere(transform.position, EngageDistance);
-			foreach (Collider c in colliders)
-			{
-				PlayerControlled pc = c.GetComponent<PlayerControlled>();
-				if (pc && pc.playerID != playerID)
-				{
-					SetTarget(pc);
-					return;
-				}
-			}
-		}
-
-		public override void SetTarget(PlayerControlled target)
-		{
-			targetObj = target;
-			foreach (Weapon weapon in weapons)
-				weapon.SetTarget(targetObj);
-		}
-
-
 		// Add a new position, or make a single new position to the list
 		public override void SetMove(Vector3 Position, bool Increment)
 		{
@@ -488,5 +424,70 @@ namespace OdWyer.RTS
 	//			return res;
 	//		}
 	//	}
+
+
+		//---	TARGETING	---//
+		public PlayerControlled targetObj = null;
+
+		private Transform _aimTransform = null;
+		private Transform AimTransform
+		{ get {
+			if (!_aimTransform)
+			{
+				_aimTransform = new GameObject("Aim").transform;
+				_aimTransform.SetParent(transform);
+				_aimTransform.localPosition = Vector3.zero;
+				_aimTransform.localRotation = Quaternion.identity;
+			}
+
+			return _aimTransform;
+		}	}
+
+		private void UpdateAiming()
+		{
+			if(!targetObj)
+				FindTarget();
+
+			Vector3 targetAim = transform.forward;
+			if (targetObj)
+				targetAim = (targetObj.transform.position - transform.position).normalized;
+
+			bool aimLock = Vector3.Angle(AimTransform.forward, targetAim) < 5;
+			foreach (Weapon w in weapons)
+				w.Fire(targetObj && aimLock);
+
+			if (aimLock)
+				return;
+
+			AimTransform.rotation = Quaternion.Slerp
+				(AimTransform.rotation
+				,Quaternion.LookRotation(targetAim)
+				,Time.deltaTime * 2
+				);
+
+			foreach (Weapon w in weapons)
+				w.AimTarget(AimTransform.forward);
+		}
+
+		private void FindTarget()
+		{
+			Collider[] colliders = Physics.OverlapSphere(transform.position, EngageDistance);
+			foreach (Collider c in colliders)
+			{
+				PlayerControlled pc = c.GetComponent<PlayerControlled>();
+				if (pc && pc.playerID != playerID)
+				{
+					SetTarget(pc);
+					return;
+				}
+			}
+		}
+
+		public override void SetTarget(PlayerControlled target)
+		{
+			targetObj = target;
+			foreach (Weapon weapon in weapons)
+				weapon.SetTarget(targetObj);
+		}
 	}
 }
