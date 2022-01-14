@@ -74,8 +74,6 @@ public abstract class Projectile : MonoBehaviour {
 
     public virtual void OnTriggerEnter(Collider hit)
     {
-		Console.Function_Instance f = Console.Start ("Projectile", "OnTriggerEnter");
-
 		//	If we collide with a PlayerControlled
         PlayerControlled hitObj = hit.GetComponent<PlayerControlled>();
         if (hitObj)
@@ -97,7 +95,5 @@ public abstract class Projectile : MonoBehaviour {
                 EndNow();
             }
         }
-
-		f.End ();
     }
 }

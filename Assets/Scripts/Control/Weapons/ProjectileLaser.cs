@@ -75,8 +75,6 @@ public class ProjectileLaser : Projectile {
 
     void Update()
     {
-		Console.Function_Instance f = Console.Start ("ProjectileLaser", "Update");
-
 		//	Increment and apply width
 		currentWidth -= currentWidth * Time.deltaTime / life;
 
@@ -91,8 +89,6 @@ public class ProjectileLaser : Projectile {
 		{
 			drawEffect.SetPosition(1, target.transform.position + slideShift);
 		}
-
-		f.End ();
     }
 
 	//	Override OnTriggerEnter to do nothing just in case

@@ -25,8 +25,6 @@ public class SelectableLoadout : MonoBehaviour {
 	
     void Awake()
     {
-		Console.Function_Instance f = Console.Start ("SelectableLoadout", "Awake");
-
 		if(GetComponent<Binary_Generator>())
 		{
 			GetComponent<Binary_Generator>().SaveAll();
@@ -49,8 +47,6 @@ public class SelectableLoadout : MonoBehaviour {
         {
             Destroy(this.gameObject);
         }
-
-		f.End ();
     }
 
     public static bool ForgeAvailable<T>(string ID)

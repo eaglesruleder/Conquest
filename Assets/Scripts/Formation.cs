@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-public class Formation : MonoBehaviour{
 
-    static float deltaAngle = 30;
-    static float delta3DAngle = 30;
+public class Formation : MonoBehaviour
+{
+    const float deltaAngle = 30;
+    const float delta3DAngle = 30;
 
     public static void DeltaFormation(List<PlayerControlled> units, Vector3 forward, float spreadDistance)
     {
