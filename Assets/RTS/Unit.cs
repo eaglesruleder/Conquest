@@ -5,9 +5,13 @@ using UnityEngine;
 
 namespace OdWyer.RTS
 {
+	[RequireComponent(typeof(Rigidbody))]
 	public class Unit : PlayerControlled
 	{
 		public bool upgWeaponActivatable = false;
+
+		private Rigidbody _rigidBody = null;
+		private Rigidbody Rigidbody => _rigidBody ? _rigidBody : (_rigidBody = GetComponent<Rigidbody>());
 
 
 		private Loadout_Unit loadout;
@@ -15,7 +19,6 @@ namespace OdWyer.RTS
 		Loadable_Hull loadable;
 		private List<Weapon> weapons = new List<Weapon>();
 
-		Technology shipTech;
 		public int currentKills = 0;
 
 		public Queue<Vector3> destPositions = new Queue<Vector3>();
@@ -53,52 +56,36 @@ namespace OdWyer.RTS
 			loadable = loading;
 
 			gameObject.name = loadable.Loadable_Name;
-		
-			if(SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.selectionObj))
-			{
-				SelectionObj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.selectionObj);
-				SelectionObj.transform.parent = transform;
-				SelectionObj.transform.localPosition = Vector3.zero;
-				SelectionObj.transform.localRotation = Quaternion.identity;
-				SelectionObj.gameObject.SetActive(false);
-			}
-			else
-			{
-				throw new UnityEngine.UnityException("MeshHandler " + loadable.selectionObj + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
-			}
 
-			if(SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.Loadable_Mesh))
-			{
-				MeshHandler hullobj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.Loadable_Mesh);
-				hullobj.transform.parent = transform;
-				hullobj.transform.localPosition = Vector3.zero;
-				hullobj.transform.localRotation = Quaternion.identity;
-			}
-			else
-			{
-				throw new UnityEngine.UnityException("MeshHandler " + loadable.selectionObj + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
-			}
-        
-			// Check Exists
+			if (!SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.selectionObj))
+				throw new UnityException("MeshHandler " + loadable.selectionObj + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
+
+			if (!SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.Loadable_Mesh))
+				throw new UnityException("MeshHandler " + loadable.Loadable_Mesh + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
+
 			if (!SelectableLoadout.ForgeAvailable<ParticleSystem>(loadable.shieldHit))
-			{
-				throw new UnityEngine.UnityException("ParticleSystem " + loadable.shieldHit + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
-			}
+				throw new UnityException("ParticleSystem " + loadable.shieldHit + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
 
-			// Check Exists
 			if (!SelectableLoadout.ForgeAvailable<ParticleSystem>(loadable.deathEffect))
-			{
-				throw new UnityEngine.UnityException("ParticleSystem " + loadable.deathEffect + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
-			}
+				throw new UnityException("ParticleSystem " + loadable.deathEffect + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
+
+			SelectionObj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.selectionObj);
+			SelectionObj.transform.parent = transform;
+			SelectionObj.transform.localPosition = Vector3.zero;
+			SelectionObj.transform.localRotation = Quaternion.identity;
+			SelectionObj.gameObject.SetActive(false);
+
+			MeshHandler hullobj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.Loadable_Mesh);
+			hullobj.transform.parent = transform;
+			hullobj.transform.localPosition = Vector3.zero;
+			hullobj.transform.localRotation = Quaternion.identity;
         
 			loadable.Loadable_Collider.AddComponent(gameObject);
 
-			// Add Rigidbody with Y-Axis rotation only
-			Rigidbody body = gameObject.AddComponent<Rigidbody>();
-			body.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-			body.drag = 1f;
-			body.angularDrag = 1f;
-			body.useGravity = false;
+			Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+			Rigidbody.drag = 1f;
+			Rigidbody.angularDrag = 1f;
+			Rigidbody.useGravity = false;
 		
 			return this;
 		}
@@ -106,32 +93,30 @@ namespace OdWyer.RTS
 		public Unit SetUnitLoadout(Loadout_Unit loading)
 		{
 			if (!loading.Loadout_Hull.Equals(loadable.Loadable_ID))
+				throw new UnityException("hullID " + loadable.Loadable_ID + " does not match PlayerLoadout.UnitLoadout " + loading.Loadout_Hull);
+
+			foreach (Loadout.WeaponPos wp in loadout.weapons)
 			{
-				throw new UnityEngine.UnityException("hullID " + loadable.Loadable_ID + " does not match PlayerLoadout.UnitLoadout " + loading.Loadout_Hull);
+				if (!SelectableLoadout.ForgeAvailable<Weapon>(wp.weaponID))
+					throw new UnityException("weaponID " + wp.weaponID + " declared but not found on PlayerLoadout.UnitLoadout " + loadout.Loadout_ID);
 			}
-		
+
 			loadout = loading;
 
 			gameObject.name = loadout.Loadout_Name;
 		
 			int points = loadable.points;
 		
-			foreach (Loadout_Unit.WeaponPos wp in loadout.weapons)
+			foreach (Loadout.WeaponPos wp in loadout.weapons)
 			{
-				if (!SelectableLoadout.ForgeAvailable<Weapon>(wp.weaponID))
-				{
-					throw new UnityEngine.UnityException("weaponID " + wp.weaponID + " declared but not found on PlayerLoadout.UnitLoadout " + loadout.Loadout_ID);
-				}
 				Weapon temp = (Weapon)SelectableLoadout.Forge<Weapon>(wp.weaponID);
 			
 				points -= temp.points;
 				if(points < 0)
 				{
 					foreach(Weapon w in weapons)
-					{
 						Destroy(w.gameObject);
-					}
-					throw new UnityEngine.UnityException("Points overdraw on " + loadout.Loadout_ID);
+					throw new UnityException("Points overdraw on " + loadout.Loadout_ID);
 				}
 			
 				temp.transform.parent = transform;
@@ -144,10 +129,7 @@ namespace OdWyer.RTS
 			return this;
 		}
 		
-		public void KilledTarget()
-		{
-			currentKills++;
-		}
+		public void KilledTarget() => currentKills++;
 
 		// Apply damage to unit
 		public override bool Damage(int damage, float[] armorBonus, Vector3 hitPoint)
@@ -183,7 +165,7 @@ namespace OdWyer.RTS
 				Selected(false);
 				Vector3 torque = (transform.position - hitPoint).normalized * damage;
 				torque = new Vector3(torque.z, torque.y, torque.z);
-				GetComponent<Rigidbody>().AddTorque(torque);
+				Rigidbody.AddTorque(torque);
 				EndSelf();
 				return true;
 			}
@@ -218,18 +200,14 @@ namespace OdWyer.RTS
 
 		public override void EndSelf()
 		{
-			//	Create kasplosion at position
 			ParticleSystem dieEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(loadable.deathEffect);
 			dieEffect.transform.position = transform.position;
 			dieEffect.transform.rotation = transform.rotation;
 			dieEffect.Emit(150);
 			Destroy (dieEffect.gameObject, 2f);
 
-			//	Apply EndNow to Weapons Immediately
 			foreach (Weapon wp in weapons)
-			{
 				wp.EndNow();
-			}
 
 			base.EndSelf();
 		}
@@ -337,7 +315,7 @@ namespace OdWyer.RTS
 				engAngle = 90;
 			engAngle *= Mathf.Deg2Rad;
 
-			GetComponent<Rigidbody>().MovePosition(transform.position + (targetDir * Mathf.Cos(engAngle) * Engine));
+			Rigidbody.MovePosition(transform.position + (targetDir * Mathf.Cos(engAngle) * Engine));
 			transform.rotation = Quaternion.Slerp
 				(transform.rotation
 				,Quaternion.LookRotation(targetDir)
