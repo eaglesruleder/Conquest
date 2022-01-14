@@ -18,7 +18,7 @@ namespace OdWyer.RTS
 		Technology shipTech;
 		public int currentKills = 0;
 
-		public List<Vector3> destPositions = new List<Vector3>();
+		public Queue<Vector3> destPositions = new Queue<Vector3>();
 		Vector3? targetPosition = null;
 
 
@@ -146,58 +146,14 @@ namespace OdWyer.RTS
 		public void Update()
 		{
 			UpdateAiming();
-
-			//	//	//	Move to posiiton	//	//	//
-			// If near targetPosition, null targetPosition
-			if(Vector3.Distance(transform.position, targetPosition.Value) <= StopDist)
-			{
-				destPositions.Remove(targetPosition.Value);
-				targetPosition = null;
-			}
+			UpdatePosition();
+			
 
 			// If no target destination exists
 			if(!targetPosition.HasValue)
 			{
 				// Begin destination check by checking if there is already an input destination
-				if (destPositions.Count != 0)
-				{
-					// Raycast check that there is no environment in the way of the next position
-					// Initialise Raycast variables
-					Vector3 relPos = destPositions[0] - transform.position;
-					Ray ray = new Ray(transform.position, relPos);
-					float relPosDist = Vector3.Distance(Vector3.zero, relPos);
-					RaycastHit checkHit;
 				
-					int layer = 1 << LayerMask.NameToLayer("Environment");
-				
-					// If there is an 'Environment' object get out the way
-					if (Physics.SphereCast(ray, GetComponent<CapsuleCollider>().radius * 1.1f, out checkHit, relPosDist, layer))
-					{
-						// In short, get avoid direction
-						Vector3 toHit = checkHit.transform.position - transform.position;
-						Vector3 toPoint = checkHit.point - transform.position;
-						Vector3 perpNorm = Vector3.Cross(toHit, toPoint);
-						Vector3 avoidDir = Vector3.Cross(perpNorm, toHit).normalized;
-					
-						// Get the ship size
-						float avoidDist = checkHit.collider.gameObject.GetComponent<CapsuleCollider>().radius + GetComponent<CapsuleCollider>().height;
-					
-						// Get apply the avoid
-						Vector3 avoidVec = checkHit.transform.position + avoidDir * avoidDist;
-						destPositions.Insert(0, avoidVec);
-					}
-				
-					// Move towards first pos
-					targetPosition = destPositions[0];
-				}
-				// Else follow target
-				else if (targetObj)
-				{
-					if(Vector3.Distance(targetObj.transform.position, transform.position) > (EngageDistance * 4f / 5f))
-					{
-						targetPosition = transform.position + (Vector3.Normalize(targetObj.transform.position - transform.position) * Engine);
-					}
-				}
 			}
 		
 			// If there is target dest
@@ -228,7 +184,46 @@ namespace OdWyer.RTS
 
 		private void UpdatePosition()
 		{
+			if (targetPosition.HasValue
+			&&	Vector3.Distance(transform.position, targetPosition.Value) <= StopDist
+				)
+				targetPosition = null;
 
+			if (!targetPosition.HasValue)
+				FindNextPosition();
+		}
+
+		private void FindNextPosition()
+		{
+			if (destPositions.Any())
+			{
+				Vector3 relPos = destPositions.Peek() - transform.position;
+				if (Physics.SphereCast
+					(new Ray(transform.position, relPos)
+					,GetComponent<CapsuleCollider>().radius * 1.1f
+					,out RaycastHit checkHit
+					,Vector3.Distance(Vector3.zero, relPos)
+					,1 << LayerMask.NameToLayer("Environment")
+					))
+				{
+					Vector3 objectPos = checkHit.transform.position - transform.position;
+					Vector3 pointPos = checkHit.point - transform.position;
+					Vector3 perpNorm = Vector3.Cross(objectPos, pointPos);
+					Vector3 avoidDir = Vector3.Cross(perpNorm, objectPos).normalized;
+
+					float avoidDist = checkHit.collider.gameObject.GetComponent<CapsuleCollider>().radius + GetComponent<CapsuleCollider>().height;
+					targetPosition = checkHit.transform.position + avoidDir * avoidDist;
+					return;
+				}
+
+				targetPosition = destPositions.Dequeue();
+				return;
+			}
+			
+			if (targetObj
+			&&	Vector3.Distance(targetObj.transform.position, transform.position) > (EngageDistance * 0.8f)
+				)
+				targetPosition = transform.position + ((targetObj.transform.position - transform.position).normalized * Engine);
 		}
 
 		// Add a new position, or make a single new position to the list
@@ -257,16 +252,13 @@ namespace OdWyer.RTS
 				}
 			}
 
-			if (Increment)
+			if(!Increment)
 			{
-				destPositions.Add(Position);
-			}
-			else
-			{
-				destPositions = new List<Vector3> { Position };
-				// Due to a new list, reset targetPosition
+				destPositions.Clear();
 				targetPosition = null;
 			}
+
+			destPositions.Enqueue(Position);
 		}
 
 		public void KilledTarget()
