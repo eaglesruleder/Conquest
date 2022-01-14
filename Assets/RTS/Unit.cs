@@ -7,8 +7,6 @@ namespace OdWyer.RTS
 {
 	public class Unit : PlayerControlled
 	{
-		private static Vector3 posNull = new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
-
 		public bool upgWeaponActivatable = false;
 
 
@@ -21,7 +19,7 @@ namespace OdWyer.RTS
 		public int currentKills = 0;
 
 		public List<Vector3> destPositions = new List<Vector3>();
-		Vector3 targetPosition = posNull;
+		Vector3? targetPosition = null;
 
 
 		public override string Name => loadout.Loadout_Name;
@@ -151,14 +149,14 @@ namespace OdWyer.RTS
 
 			//	//	//	Move to posiiton	//	//	//
 			// If near targetPosition, null targetPosition
-			if(Vector3.Distance(transform.position, targetPosition) <= StopDist)
+			if(Vector3.Distance(transform.position, targetPosition.Value) <= StopDist)
 			{
-				destPositions.Remove(targetPosition);
-				targetPosition = posNull;
+				destPositions.Remove(targetPosition.Value);
+				targetPosition = null;
 			}
 
 			// If no target destination exists
-			if(targetPosition.Equals(posNull))
+			if(!targetPosition.HasValue)
 			{
 				// Begin destination check by checking if there is already an input destination
 				if (destPositions.Count != 0)
@@ -203,10 +201,10 @@ namespace OdWyer.RTS
 			}
 		
 			// If there is target dest
-			if (!targetPosition.Equals(posNull))
+			if (targetPosition.HasValue)
 			{
 				//	Get rel position
-				Vector3 targetDir = targetPosition - transform.position;
+				Vector3 targetDir = targetPosition.Value - transform.position;
 			
 				//	If the angle is greater then left/right (aka behind) limit to left/right
 				//	This stops reverse thrust
@@ -216,7 +214,7 @@ namespace OdWyer.RTS
 				engAngle *= Mathf.Deg2Rad;
 			
 				//	Move to this + (directipn * angle of thrust * engine)
-				GetComponent<Rigidbody>().MovePosition(transform.position + ((targetPosition - transform.position).normalized * Mathf.Cos(engAngle) * Engine));
+				GetComponent<Rigidbody>().MovePosition(transform.position + ((targetPosition.Value - transform.position).normalized * Mathf.Cos(engAngle) * Engine));
 			
 				//	Rotate to (increment towards target direction) with 'up' of world 'up'
 				transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, targetDir, Time.deltaTime * 2, 0.0F), Vector3.up);
@@ -226,6 +224,11 @@ namespace OdWyer.RTS
 			{
 				transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, new Vector3(transform.forward.x, 0, transform.forward.z), Time.deltaTime, 0.0F), Vector3.up);
 			}
+		}
+
+		private void UpdatePosition()
+		{
+
 		}
 
 		// Add a new position, or make a single new position to the list
@@ -262,7 +265,7 @@ namespace OdWyer.RTS
 			{
 				destPositions = new List<Vector3> { Position };
 				// Due to a new list, reset targetPosition
-				targetPosition = posNull;
+				targetPosition = null;
 			}
 		}
 
