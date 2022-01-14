@@ -39,8 +39,8 @@ public class GUISelectedUnit : MonoBehaviour {
         {
             selectedTitle.text = selected.name;
             selectedKills.text = ((Unit) selected).currentKills.ToString();
-            selectedHealth.text = selected.currentHealth.ToString() + "/" + ((Unit)selected).health.ToString();
-            selectedSupplies.text = ((Unit)selected).currentSupply.ToString() + "/" + ((Unit)selected).supply.ToString();
+            selectedHealth.text = selected.CurrentHealth.ToString() + "/" + ((Unit)selected).Health.ToString();
+            selectedSupplies.text = ((Unit)selected).CurrentSupply.ToString() + "/" + ((Unit)selected).Supply.ToString();
         }
     }
 

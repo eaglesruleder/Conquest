@@ -1,21 +1,19 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 using OdWyer.Control;
 
 public abstract class PlayerControlled : MonoBehaviour {
 
-    // PlayerControlled values
 	public abstract string Name { get; }
-    public MeshHandler selectionObj;
+    public MeshHandler SelectionObj;
 
-	public abstract int health { get; }
+	public abstract int Health { get; }
 	internal float damageTaken = 0;
-	public int currentHealth{ get{return (damageTaken < health) ? health - (int)damageTaken : 0;}}
+	public int CurrentHealth => (damageTaken < Health) ? Health - (int)damageTaken : 0;
 
-	public abstract int supply { get; }
+	public abstract int Supply { get; }
 	internal float supplyDrained = 0;
-	public int currentSupply{ get{return (supplyDrained < supply) ? supply - (int)supplyDrained : 0;}}
+	public int CurrentSupply{ get{return (supplyDrained < Supply) ? Supply - (int)supplyDrained : 0;}}
 
 	// Instantiated Vairables
     public string playerID;
@@ -29,9 +27,9 @@ public abstract class PlayerControlled : MonoBehaviour {
 
     public void Selected(bool Select)
     {
-        if (selectionObj)
+        if (SelectionObj)
         {
-            selectionObj.gameObject.SetActive(Select);
+            SelectionObj.gameObject.SetActive(Select);
         }
     }
 
@@ -58,7 +56,7 @@ public abstract class PlayerControlled : MonoBehaviour {
 	// Remove pc from list of OnScreen selectables via Renderer
     public void OnBecameVisible()
     {
-		if(currentHealth > 0)
+		if(CurrentHealth > 0)
         {
 			PCSelector.OnScreen(this);
         }

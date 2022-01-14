@@ -1,125 +1,56 @@
-﻿using UnityEngine; 
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using UnityEngine; 
 
 public class Unit : PlayerControlled
 {
-	static Vector3 posNull = new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
+	private static Vector3 posNull = new Vector3(Mathf.Infinity, Mathf.Infinity, Mathf.Infinity);
 
-    //Hull variables
+	public bool upgWeaponActivatable = false;
+
+
+	private Loadout_Unit loadout;
+
 	Loadable_Hull loadable;
-	
-    public override int health
-    { 
-        get
-        {
-			float result = loadable.health + (loadable.healthFromArmour * loadout.armourLevel);// + (techHull.Level * techHull.influence);
-            //result *= (1 + techHull.Bonus);
+	private List<Weapon> weapons = new List<Weapon>();
 
-            return Mathf.CeilToInt(result);
-        }
-    }
-    public float shield
-    {
-        get
-        {
-			float result = loadable.shield + (loadable.shieldFromArmour * loadout.armourLevel);// + (techShield.Level * techShield.influence);
-            //result *= (1 + techShield.Bonus);
-
-            return result;
-        }
-    }
-	public float stopDist {get{return loadable.stopDist;}}
-    public float engine
-    {
-        get
-        {
-			float result = loadable.engine;// + (techEngine.Level * techEngine.influence);
-            //result *= (1 + techEngine.Bonus);
-
-            // Ratio for actual to game is 1:100 as Vector3.MoveTowards()
-            // Ratio for actual to game is 1:50,000? as Rigidbody.velocity
-            return result * Time.deltaTime / 100f;
-        }
-        
-    }
-    public override int supply
-    {
-        get
-        {
-			float result = loadable.supply + (loadable.supplyFromSupply * loadout.supplyLevel);// + (techSupply.Level * techSupply.influence);
-            //result *= (1 + techSupply.Bonus);
-
-            return Mathf.CeilToInt(result);
-        }
-    }
-    public int sensor
-    {
-		get
-		{
-			return -1;
-		}
-    }
-    
-	
-    //Unit Variables
-	Loadout_Unit loadout;
-	public override string Name {get{return loadout.Loadout_Name;}}
-	int armourLevel { get { return loadout.armourLevel; } }
-	int supplyLevel { get { return loadout.supplyLevel; } }
-    List<Weapon> weapons = new List<Weapon>();
-
-	
-    public bool upgWeaponActivatable = false;
-	// Dynamic values
-    public float damSec
-	{
-		get
-		{
-			float result = 0;
-			foreach(Weapon w in weapons)
-			{
-				result += (float)w.weaponDamage * (float)w.fireRate * (float)w.volley;
-			}
-			return result;
-		}
-    }
-    public float supSec
-	{
-		get
-		{
-			float result = 0;
-			foreach(Weapon w in weapons)
-			{
-				result += (float)w.supplyDrain * (float)w.fireRate * (float)w.volley;
-			}
-			return result;
-		}
-    }
-    public float engageDistance
-	{
-		get
-		{
-			float result = 0;
-			foreach(Weapon w in weapons)
-			{
-				if(w.engageDistance > result) result = w.engageDistance;
-			}
-			// Multiply by 10 to make relative to gameworld
-			return result * 10;
-		}
-    }
-
-
-	// Instantiated Variables
 	Technology shipTech;
 	public int currentKills = 0;
 
 	public List<Vector3> destPositions = new List<Vector3>();
 	Vector3 targetPosition = posNull;
-	
+
 	bool aimForward = false;
 	public PlayerControlled targetObj = null;
 	GameObject pitchObj = null;
+
+
+	public override string Name => loadout.Loadout_Name;
+
+	public override int Health => Mathf.CeilToInt(loadable.health + (loadable.healthFromArmour * loadout.armourLevel));
+	public float Shield => loadable.shield + (loadable.shieldFromArmour * loadout.armourLevel);
+	public override int Supply => Mathf.CeilToInt(loadable.supply + (loadable.supplyFromSupply * loadout.supplyLevel));
+
+
+	public int armourLevel => loadout.armourLevel;
+	public int supplyLevel => loadout.supplyLevel;
+
+
+	// Ratio for actual to game is 1:100 as Vector3.MoveTowards()
+	// Ratio for actual to game is 1:50,000? as Rigidbody.velocity
+	public float Engine => loadable.engine * Time.deltaTime / 100f;
+	public float StopDist => loadable.stopDist;
+
+
+	// Multiply by 10 to make relative to gameworld
+	public float EngageDistance => weapons.Max(w => w.engageDistance) * 10;
+	public int Sensor => -1;
+
+    
+	public float DamPerSec => weapons.Sum(w => w.fireRate * w.volley * w.weaponDamage);
+	public float SupPerSec => weapons.Sum(w => w.fireRate * w.volley * w.supplyDrain);
+	
 	
     public Unit SetHull(Loadable_Hull loading)
     {
@@ -135,11 +66,11 @@ public class Unit : PlayerControlled
 		
 		if(SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.selectionObj))
         {
-			selectionObj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.selectionObj);
-			selectionObj.transform.parent = transform;
-			selectionObj.transform.localPosition = Vector3.zero;
-			selectionObj.transform.localRotation = Quaternion.identity;
-			selectionObj.gameObject.SetActive(false);
+			SelectionObj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.selectionObj);
+			SelectionObj.transform.parent = transform;
+			SelectionObj.transform.localPosition = Vector3.zero;
+			SelectionObj.transform.localRotation = Quaternion.identity;
+			SelectionObj.gameObject.SetActive(false);
         }
         else
         {
@@ -230,7 +161,7 @@ public class Unit : PlayerControlled
 		if(!targetObj)
 		{
 			targetObj = null;
-			Collider[] colliders = Physics.OverlapSphere(transform.position, engageDistance);
+			Collider[] colliders = Physics.OverlapSphere(transform.position, EngageDistance);
 
 			foreach (Collider c in colliders)
 			{
@@ -300,7 +231,7 @@ public class Unit : PlayerControlled
 
 		//	//	//	Move to posiiton	//	//	//
 		// If near targetPosition, null targetPosition
-		if(Vector3.Distance(transform.position, targetPosition) <= stopDist)
+		if(Vector3.Distance(transform.position, targetPosition) <= StopDist)
 		{
 			destPositions.Remove(targetPosition);
 			targetPosition = posNull;
@@ -344,9 +275,9 @@ public class Unit : PlayerControlled
 			// Else follow target
 			else if (targetObj)
 			{
-				if(Vector3.Distance(targetObj.transform.position, transform.position) > (engageDistance * 4f / 5f))
+				if(Vector3.Distance(targetObj.transform.position, transform.position) > (EngageDistance * 4f / 5f))
 				{
-					targetPosition = transform.position + (Vector3.Normalize(targetObj.transform.position - transform.position) * engine);
+					targetPosition = transform.position + (Vector3.Normalize(targetObj.transform.position - transform.position) * Engine);
 				}
 			}
 		}
@@ -365,7 +296,7 @@ public class Unit : PlayerControlled
 			engAngle *= Mathf.Deg2Rad;
 			
 			//	Move to this + (directipn * angle of thrust * engine)
-			GetComponent<Rigidbody>().MovePosition(transform.position + ((targetPosition - transform.position).normalized * Mathf.Cos(engAngle) * engine));
+			GetComponent<Rigidbody>().MovePosition(transform.position + ((targetPosition - transform.position).normalized * Mathf.Cos(engAngle) * Engine));
 			
 			//	Rotate to (increment towards target direction) with 'up' of world 'up'
 			transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, targetDir, Time.deltaTime * 2, 0.0F), Vector3.up);
@@ -449,14 +380,14 @@ public class Unit : PlayerControlled
 		hitEffect.Emit(damage * damage);
 		
 		//Modify the damage as per shield for unit damaging
-		float modifier = 1f - (shield / 100) + (armorBonus[armourLevel] / 100);
+		float modifier = 1f - (Shield / 100) + (armorBonus[armourLevel] / 100);
 		damage = Mathf.CeilToInt(damage * modifier);
 		
-		if (currentHealth > damage)
+		if (CurrentHealth > damage)
 		{
 			damageTaken += damage;
 		}
-		else if (currentHealth != 0)
+		else if (CurrentHealth != 0)
 		{
 			damageTaken = Mathf.Infinity;
 			OnBecameInvisible();
@@ -493,7 +424,7 @@ public class Unit : PlayerControlled
         newPos += targetSide;
 
 		//	Apply
-        transform.position = Vector3.MoveTowards(transform.position, newPos, engine);
+        transform.position = Vector3.MoveTowards(transform.position, newPos, Engine);
     }
 
     public override void EndSelf()
