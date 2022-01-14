@@ -23,10 +23,6 @@ namespace OdWyer.RTS
 		public List<Vector3> destPositions = new List<Vector3>();
 		Vector3 targetPosition = posNull;
 
-		bool aimForward = false;
-		public PlayerControlled targetObj = null;
-		GameObject pitchObj = null;
-
 
 		public override string Name => loadout.Loadout_Name;
 
@@ -57,14 +53,8 @@ namespace OdWyer.RTS
 		public Unit SetHull(Loadable_Hull loading)
 		{
 			loadable = loading;
-		
-			gameObject.name = loadable.Loadable_Name;
 
-			// Create empty to use as targeting object
-			pitchObj = new GameObject();
-			pitchObj.transform.parent = transform;
-			pitchObj.transform.localPosition = Vector3.zero;
-			pitchObj.transform.localRotation = Quaternion.identity;
+			gameObject.name = loadable.Loadable_Name;
 		
 			if(SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.selectionObj))
 			{
@@ -155,81 +145,9 @@ namespace OdWyer.RTS
 
 			return this;
 		}
-
-		void Update()
+		public void Update()
 		{
-			//	//	//	BEGIN WITH AIMING	//	//	//
-			// Search for targets in range
-			if(!targetObj)
-			{
-				targetObj = null;
-				Collider[] colliders = Physics.OverlapSphere(transform.position, EngageDistance);
-
-				foreach (Collider c in colliders)
-				{
-					PlayerControlled temp = c.GetComponent<PlayerControlled>();
-					if (temp)
-					{
-						// If not on player team set as target
-						if (temp.playerID != playerID)
-						{
-							SetTarget(temp);
-							break;
-						}
-					}
-				}
-			}
-		
-			// If not zeroed, or there is a target
-			if (!aimForward || targetObj)
-			{
-				//	Prepare result vars
-				Vector3 pitchDir = Vector3.zero;
-				bool firing = false;
-			
-				//	If no target we are zeroing
-				if(!targetObj)
-				{
-					//	If we are not straight
-					if(!pitchObj.transform.rotation.Equals(transform.rotation))
-					{
-						//	Straighten up
-						pitchDir = Vector3.RotateTowards(pitchObj.transform.forward, transform.forward, Time.deltaTime * 2, 0.0F);
-						pitchObj.transform.rotation = Quaternion.LookRotation(pitchDir, transform.up);
-					}
-					//	Then determine if we are straight yet
-					if(pitchObj.transform.rotation.Equals(transform.rotation))
-					{
-						aimForward = true;
-					}
-				}
-				//	Else we're aiming at the target
-				else
-				{
-					//	So we arent aiming forward
-					aimForward = false;
-				
-					//	Aim at the target
-					pitchDir = Vector3.RotateTowards(pitchObj.transform.forward, targetObj.transform.position - transform.position, Time.deltaTime * 2, 0.0F);
-					pitchObj.transform.rotation = Quaternion.LookRotation(pitchDir, transform.up);
-				
-					//	If within 5deg then fire
-					firing = Vector3.Angle(pitchObj.transform.forward, targetObj.transform.position - transform.position) < 5;
-				}
-
-				//	If pitch dir is not zeroed then we have reaimed
-				bool aiming = !pitchDir.Equals(Vector3.zero);
-
-				//	Apply to all weapons
-				foreach (Weapon w in weapons)
-				{
-					w.Fire(firing);
-					if(aiming)
-					{
-						w.AimTarget(pitchDir);
-					}
-				}
-			}
+			UpdateAiming();
 
 			//	//	//	Move to posiiton	//	//	//
 			// If near targetPosition, null targetPosition
@@ -310,14 +228,67 @@ namespace OdWyer.RTS
 			}
 		}
 
-		public override void SetTarget(PlayerControlled Target)
-		{
-			targetObj = Target;
-			foreach (Weapon weapon in weapons)
+		public PlayerControlled targetObj = null;
+
+		private Transform _aimTransform = null;
+		private Transform AimTransform
+		{ get {
+			if (!_aimTransform)
 			{
-				weapon.SetTarget(targetObj);
+				_aimTransform = new GameObject("Aim").transform;
+				_aimTransform.SetParent(transform);
+				_aimTransform.localPosition = Vector3.zero;
+				_aimTransform.localRotation = Quaternion.identity;
 			}
+
+			return _aimTransform;
+		}	}
+
+		private void UpdateAiming()
+		{
+			if(!targetObj)
+				SetTarget(FindTarget());
+
+			Vector3 targetAim = transform.forward;
+			if (targetObj)
+				targetAim = (targetObj.transform.position - transform.position).normalized;
+
+			bool aimLock = Vector3.Angle(AimTransform.forward, targetAim) < 5;
+			foreach (Weapon w in weapons)
+				w.Fire(targetObj && aimLock);
+
+			if (aimLock)
+				return;
+
+			AimTransform.rotation = Quaternion.Slerp
+				(AimTransform.rotation
+				,Quaternion.LookRotation(targetAim)
+				,Time.deltaTime * 2
+				);
+
+			foreach (Weapon w in weapons)
+				w.AimTarget(AimTransform.forward);
 		}
+
+		private PlayerControlled FindTarget()
+		{
+			Collider[] colliders = Physics.OverlapSphere(transform.position, EngageDistance);
+			foreach (Collider c in colliders)
+			{
+				PlayerControlled temp = c.GetComponent<PlayerControlled>();
+				if (temp && temp.playerID != playerID)
+					return temp;
+			}
+			return null;
+		}
+
+		public override void SetTarget(PlayerControlled target)
+		{
+			targetObj = target;
+			foreach (Weapon weapon in weapons)
+				weapon.SetTarget(targetObj);
+		}
+
 
 		// Add a new position, or make a single new position to the list
 		public override void SetMove(Vector3 Position, bool Increment)
