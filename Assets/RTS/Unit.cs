@@ -131,71 +131,55 @@ namespace OdWyer.RTS
 		
 		public void KilledTarget() => currentKills++;
 
-		// Apply damage to unit
 		public override bool Damage(int damage, float[] armorBonus, Vector3 hitPoint)
 		{
-			//Setting up particle system
-			Vector3 relativePos = transform.position - hitPoint;
-			Quaternion rotation = Quaternion.LookRotation(relativePos);
-		
-			//Creating particle
 			ParticleSystem hitEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(loadable.shieldHit);
 			hitEffect.transform.position = hitPoint;
-			hitEffect.transform.rotation = rotation;
+			hitEffect.transform.rotation = Quaternion.LookRotation(transform.position - hitPoint);
 			Destroy (hitEffect.gameObject, 1f);
 		
-			//Setting particle speed and particle-count as per projectile damage
 			ParticleSystem.MainModule main = hitEffect.main;
 			main.startSpeed = damage / 10;
 
 			hitEffect.Emit(damage * damage);
 		
-			//Modify the damage as per shield for unit damaging
 			float modifier = 1f - (Shield / 100) + (armorBonus[armourLevel] / 100);
 			damage = Mathf.CeilToInt(damage * modifier);
-		
+
+			if (CurrentHealth == 0)
+				return false;
+
 			if (CurrentHealth > damage)
 			{
 				damageTaken += damage;
+				return false;
 			}
-			else if (CurrentHealth != 0)
-			{
-				damageTaken = Mathf.Infinity;
-				OnBecameInvisible();
-				Selected(false);
-				Vector3 torque = (transform.position - hitPoint).normalized * damage;
-				torque = new Vector3(torque.z, torque.y, torque.z);
-				Rigidbody.AddTorque(torque);
-				EndSelf();
-				return true;
-			}
-			return false;
+
+			damageTaken = Mathf.Infinity;
+
+			OnBecameInvisible();
+			Selected(false);
+
+			Vector3 torque = (transform.position - hitPoint).normalized * damage;
+			torque.x = torque.z;
+			Rigidbody.AddTorque(torque);
+
+			EndSelf();
+			return true;
 		}
-	
-		public void SupplyBurn(int supplies)
-		{
-			supplyDrained += supplies;
-		}
+
+		public void SupplyBurn(int supplies) => supplyDrained += supplies;
 
 		void OnCollisionStay(Collision hit)
 		{
-			//	Find position of collision
 			Vector3 targetDir = hit.transform.position - transform.position;
-			float hitAngle = Vector3.Angle(transform.right, targetDir);
 
-			// Determine if on Left or Right of ship
-			Vector3 targetSide;
-			if (hitAngle <= 180)
-				targetSide = transform.right;
-			else
-				targetSide = transform.right * -1;
+			Vector3 targetSide = transform.right;
+			if (Vector3.Angle(transform.right, targetDir) > 180)
+				targetSide *= -1;
 
-			//	Determine avoidance
 			Vector3 newPos = transform.position - transform.forward;
-			newPos += targetSide;
-
-			//	Apply
-			transform.position = Vector3.MoveTowards(transform.position, newPos, Engine);
+			transform.position = Vector3.MoveTowards(transform.position, newPos + targetSide, Engine);
 		}
 
 		public override void EndSelf()
