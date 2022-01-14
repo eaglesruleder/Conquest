@@ -486,7 +486,7 @@ namespace OdWyer.Control
             bool increment = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
             //	Apply the move to selectedObject directly
-            selectedObject.SetMove(TargetPosition, increment);
+            selectedObject.SetMove(TargetPosition, !increment);
 
             //	And for all other selected objs
             foreach (PlayerControlled pc in selectedObjects)

@@ -147,39 +147,6 @@ namespace OdWyer.RTS
 		{
 			UpdateAiming();
 			UpdatePosition();
-			
-
-			// If no target destination exists
-			if(!targetPosition.HasValue)
-			{
-				// Begin destination check by checking if there is already an input destination
-				
-			}
-		
-			// If there is target dest
-			if (targetPosition.HasValue)
-			{
-				//	Get rel position
-				Vector3 targetDir = targetPosition.Value - transform.position;
-			
-				//	If the angle is greater then left/right (aka behind) limit to left/right
-				//	This stops reverse thrust
-				float engAngle = Vector3.Angle(transform.forward, targetDir);
-				if (engAngle >= 90)
-					engAngle = 90;
-				engAngle *= Mathf.Deg2Rad;
-			
-				//	Move to this + (directipn * angle of thrust * engine)
-				GetComponent<Rigidbody>().MovePosition(transform.position + ((targetPosition.Value - transform.position).normalized * Mathf.Cos(engAngle) * Engine));
-			
-				//	Rotate to (increment towards target direction) with 'up' of world 'up'
-				transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, targetDir, Time.deltaTime * 2, 0.0F), Vector3.up);
-			}
-			// Else align upwards
-			else if(transform.forward.z != 0)
-			{
-				transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, new Vector3(transform.forward.x, 0, transform.forward.z), Time.deltaTime, 0.0F), Vector3.up);
-			}
 		}
 
 		private void UpdatePosition()
@@ -191,6 +158,32 @@ namespace OdWyer.RTS
 
 			if (!targetPosition.HasValue)
 				FindNextPosition();
+
+			if(!targetPosition.HasValue)
+			{
+				if (transform.forward.z != 0)
+					transform.rotation = Quaternion.Slerp
+						(transform.rotation
+						,Quaternion.LookRotation(new Vector3(transform.forward.x, 0, transform.forward.z))
+						,Time.deltaTime * 2
+						);
+
+				return;
+			}
+
+			Vector3 targetDir = (targetPosition.Value - transform.position).normalized;
+
+			float engAngle = Vector3.Angle(transform.forward, targetDir);
+			if (engAngle >= 90)
+				engAngle = 90;
+			engAngle *= Mathf.Deg2Rad;
+
+			GetComponent<Rigidbody>().MovePosition(transform.position + (targetDir * Mathf.Cos(engAngle) * Engine));
+			transform.rotation = Quaternion.Slerp
+				(transform.rotation
+				,Quaternion.LookRotation(targetDir)
+				,Time.deltaTime * 2
+				);
 		}
 
 		private void FindNextPosition()
@@ -223,42 +216,31 @@ namespace OdWyer.RTS
 			if (targetObj
 			&&	Vector3.Distance(targetObj.transform.position, transform.position) > (EngageDistance * 0.8f)
 				)
-				targetPosition = transform.position + ((targetObj.transform.position - transform.position).normalized * Engine);
+				targetPosition = targetObj.transform.position;
 		}
 
-		// Add a new position, or make a single new position to the list
-		public override void SetMove(Vector3 Position, bool Increment)
+		public override void SetMove(Vector3 position, bool force = false)
 		{
-			if(Position.y > 20)
-			{
-				Position.y = 20;
-			}
-			else if(Position.y < -20)
-			{
-				Position.y = -20;
-			}
-
-			int layer = 1 << LayerMask.NameToLayer("Environment");
-			Collider[] col = Physics.OverlapSphere (Position, loadable.Loadable_Collider.height, layer);
+			position.y = Mathf.Clamp(position.y, 20, -20);
+			Collider[] col = Physics.OverlapSphere (position, loadable.Loadable_Collider.height, 1 << LayerMask.NameToLayer("Environment"));
 			foreach(Collider c in col)
 			{
 				Planet p = c.GetComponent<Planet>();
-				if(p)
-				{
-					float dist = c.GetComponent<CapsuleCollider>().radius + loadable.Loadable_Collider.height;
-					Vector3 dir = Position - c.transform.position;
-					dir.Normalize();
-					Position = c.transform.position + (dir * dist);
-				}
+				if (!p)
+					continue;
+				
+				float dist = c.GetComponent<CapsuleCollider>().radius + loadable.Loadable_Collider.height;
+				Vector3 dir = (position - c.transform.position).normalized;
+				position = c.transform.position + (dir * dist);
 			}
 
-			if(!Increment)
+			if(force)
 			{
 				destPositions.Clear();
 				targetPosition = null;
 			}
 
-			destPositions.Enqueue(Position);
+			destPositions.Enqueue(position);
 		}
 
 		public void KilledTarget()
