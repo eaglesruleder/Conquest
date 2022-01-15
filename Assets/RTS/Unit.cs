@@ -52,8 +52,6 @@ namespace OdWyer.RTS
 
 		public float Shield => loadable.shield + (loadable.shieldFromArmour * loadout.armourLevel);
 		public int Armour => loadout.armourLevel;
-		public int MaxHealth => Mathf.CeilToInt(loadable.health + (loadable.healthFromArmour * loadout.armourLevel));
-		public int MaxSupply => Mathf.CeilToInt(loadable.supply + (loadable.supplyFromSupply * loadout.supplyLevel));
 
 		public string ShieldEffectID => loadable.shieldHit;
 		public string DeathEffectID => loadable.deathEffect;
@@ -90,6 +88,15 @@ namespace OdWyer.RTS
 			hullobj.transform.parent = transform;
 			hullobj.transform.localPosition = Vector3.zero;
 			hullobj.transform.localRotation = Quaternion.identity;
+			
+			HullBehaviour hull = hullobj.GetComponent<HullBehaviour>();
+			hull.BaseHealth = loadable.health;
+			hull.HealthFromArmour = loadable.healthFromArmour;
+			hull.ArmourLevel = loadout.armourLevel;
+
+			hull.BaseSupply = loadable.supply;
+			hull.SupplyFromSupply = loadable.supplyFromSupply;
+			hull.SupplyLevel = loadout.supplyLevel;
         
 			loadable.Loadable_Collider.AddComponent(gameObject);
 		

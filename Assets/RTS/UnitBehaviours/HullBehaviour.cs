@@ -5,20 +5,25 @@ namespace OdWyer.RTS
 	[RequireComponent(typeof(Rigidbody))]
 	public class HullBehaviour : MonoBehaviour
 	{
-		private IUnitValues _values = null;
-		private IUnitValues Values => _values is null ? (_values = GetComponent<IUnitValues>()) : _values;
-
-
 		private Rigidbody _rigidBody = null;
 		private Rigidbody Rigidbody => _rigidBody ? _rigidBody : (_rigidBody = GetComponent<Rigidbody>());
 
+		public int BaseHealth = 0;
+		public int HealthFromArmour = 0;
+		public int ArmourLevel = 0;
+		public int MaxHealth => Mathf.CeilToInt(BaseHealth + (HealthFromArmour * ArmourLevel));
 
 		internal float damageTaken = 0;
-		public int CurrentHealth => (damageTaken < Values.MaxHealth) ? Values.MaxHealth - (int)damageTaken : 0;
+		public int CurrentHealth => (damageTaken < MaxHealth) ? MaxHealth - (int)damageTaken : 0;
 
+
+		public int BaseSupply = 0;
+		public int SupplyFromSupply = 0;
+		public int SupplyLevel = 0;
+		public int MaxSupply => Mathf.CeilToInt(BaseSupply + (SupplyFromSupply * SupplyLevel));
 
 		internal float supplyDrained = 0;
-		public int CurrentSupply => (supplyDrained < Values.MaxSupply) ? Values.MaxSupply - (int)supplyDrained : 0;
+		public int CurrentSupply => (supplyDrained < MaxSupply) ? MaxSupply - (int)supplyDrained : 0;
 
 		public bool Damage(int damage, float[] armorBonus, Vector3 hitPoint)
 		{
@@ -32,7 +37,7 @@ namespace OdWyer.RTS
 
 			hitEffect.Emit(damage * damage);
 		
-			damage = Mathf.CeilToInt(damage * Values.Shield * armorBonus[Values.Armour]);
+			damage = Mathf.CeilToInt(damage * Values.Shield * armorBonus[ArmourLevel]);
 
 			AddCollisionTorque(hitPoint, damage);
 
