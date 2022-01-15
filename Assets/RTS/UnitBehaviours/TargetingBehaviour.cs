@@ -41,7 +41,7 @@ namespace OdWyer.RTS
 			foreach (Collider c in colliders)
 			{
 				PlayerControlled pc = c.GetComponent<PlayerControlled>();
-				if (pc && pc.playerID != Values.FactionID)
+				if (pc && pc.PlayerID != Values.FactionID)
 				{
 					SetTarget(pc);
 					return;

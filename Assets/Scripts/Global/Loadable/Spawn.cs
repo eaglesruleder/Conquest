@@ -14,7 +14,7 @@ public class Spawn : MonoBehaviour {
 		if(isUnit)
 		{
 			Unit result = (Unit)SelectableLoadout.Forge<Unit> (PlayerLoadoutID);
-			result.SetPlayer (PlayerManager.ThisPlayerID);
+			result.PlayerID = PlayerManager.ThisPlayerID;
 			result.transform.position = transform.position;
 			result.transform.rotation = transform.rotation;
 		}

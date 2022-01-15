@@ -40,7 +40,7 @@ namespace OdWyer.RTS
 		public float DamPerSec => weapons.Sum(w => w.fireRate * w.volley * w.weaponDamage);
 		public float SupPerSec => weapons.Sum(w => w.fireRate * w.volley * w.supplyDrain);
 
-		public string FactionID => playerID;
+		public string FactionID => PlayerID;
 
 		// Ratio for actual to game is 1:100 as Vector3.MoveTowards()
 		// Ratio for actual to game is 1:50,000? as Rigidbody.velocity
@@ -77,11 +77,14 @@ namespace OdWyer.RTS
 			if (!SelectableLoadout.ForgeAvailable<ParticleSystem>(loadable.deathEffect))
 				throw new UnityException("ParticleSystem " + loadable.deathEffect + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
 
-			SelectionObj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.selectionObj);
-			SelectionObj.transform.parent = transform;
-			SelectionObj.transform.localPosition = Vector3.zero;
-			SelectionObj.transform.localRotation = Quaternion.identity;
-			SelectionObj.gameObject.SetActive(false);
+			if(!SelectionObj)
+			{
+				SelectionObj = ((MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.selectionObj)).gameObject;
+				SelectionObj.transform.parent = transform;
+				SelectionObj.transform.localPosition = Vector3.zero;
+				SelectionObj.transform.localRotation = Quaternion.identity;
+				Selected(false);
+			}
 
 			MeshHandler hullobj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.Loadable_Mesh);
 			hullobj.transform.parent = transform;

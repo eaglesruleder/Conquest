@@ -5,16 +5,14 @@ namespace OdWyer.RTS
 	public abstract class PlayerControlled : MonoBehaviour
 		,IUnitLifecycle
 	{
-		public string playerID;
+		public string PlayerID;
 
-		public MeshHandler SelectionObj;
-
-		public virtual void SetPlayer(string PlayerID) => playerID = PlayerID;
+		public GameObject SelectionObj;
 
 		public void Selected(bool Select)
 		{
 			if (SelectionObj)
-				SelectionObj.gameObject.SetActive(Select);
+				SelectionObj.SetActive(Select);
 		}
 
 		public virtual void BeforeDestroy()

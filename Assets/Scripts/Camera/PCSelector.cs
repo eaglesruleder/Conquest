@@ -18,7 +18,7 @@ namespace OdWyer.Control
 				.Select(ivt => ivt.GetComponentInParent<PlayerControlled>())
 				.Where(pc =>
 					pc
-				&&	pc.playerID == PlayerManager.ThisPlayerID
+				&&	pc.PlayerID == PlayerManager.ThisPlayerID
 				&&	pc.GetComponent<HullBehaviour>()
 				&&	pc.GetComponent<HullBehaviour>().CurrentHealth > 0
 					)
@@ -312,7 +312,7 @@ namespace OdWyer.Control
                             if (tempObj != null)
                             {
                                 //	Determine if enemy or 'alt' override
-                                if (PlayerManager.ThisPlayerID != tempObj.playerID || (Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.LeftAlt)))
+                                if (PlayerManager.ThisPlayerID != tempObj.PlayerID || (Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.LeftAlt)))
                                 {
                                     //	For each selected update target
                                     foreach (PlayerControlled i in selectedObjects)

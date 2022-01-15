@@ -46,10 +46,10 @@ public abstract class Projectile : MonoBehaviour {
 	public virtual void Initialise(PlayerControlled Target, PlayerControlled Launcher, int Damage, float[] ArmourBonus)
 		{
 		target = Target;
-        targetPlayerID = (target) ? target.playerID : "";
+        targetPlayerID = (target) ? target.PlayerID : "";
 
 		launcher = Launcher;
-        launcherPlayerID = (launcher) ? launcher.playerID : "";
+        launcherPlayerID = (launcher) ? launcher.PlayerID : "";
 
 		damage = Damage;
         armourBonus = ArmourBonus;
@@ -79,7 +79,7 @@ public abstract class Projectile : MonoBehaviour {
         if (hitObj)
         {
 			//	(If there is a target, is the object the target), else is the targeted team when that team is not the current team
-			if (((target) ? hitObj.Equals(target) : false) ? true : (targetPlayerID.Equals(hitObj.playerID) && !launcherPlayerID.Equals(hitObj.playerID)))
+			if (((target) ? hitObj.Equals(target) : false) ? true : (targetPlayerID.Equals(hitObj.PlayerID) && !launcherPlayerID.Equals(hitObj.PlayerID)))
             {
 				HullBehaviour targetHull = target.GetComponent<HullBehaviour>();
 				if (targetHull && targetHull.Damage(damage, armourBonus, transform.position))

@@ -50,7 +50,7 @@ public class ProjectileArc : ProjectileLaser {
 							PlayerControlled current = c.GetComponent<PlayerControlled>();
 							if(current)
 							{
-								if(current.playerID == Target.playerID && !hit.Contains(current))
+								if(current.PlayerID == Target.PlayerID && !hit.Contains(current))
 								{
 									if(!closest)
 									{

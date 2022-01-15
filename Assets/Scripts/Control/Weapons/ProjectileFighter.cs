@@ -45,7 +45,7 @@ public class ProjectileFighter : Projectile {
     public void SetTarget(PlayerControlled Target)
     {
         target = Target;
-        targetPlayerID = (target) ? target.playerID : null;
+        targetPlayerID = (target) ? target.PlayerID : null;
 
         targetLocation = RandomLocation(engageDistance);
     }
