@@ -19,7 +19,7 @@ namespace OdWyer.Control
 				.Where(pc =>
 					pc
 				&&	pc.playerID == PlayerManager.ThisPlayerID
-				&&	pc.CurrentHealth > 0
+				&&	pc.GetComponent<HullBehaviour>().CurrentHealth > 0
 					)
 				.ToList();
 

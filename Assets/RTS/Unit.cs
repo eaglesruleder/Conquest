@@ -16,37 +16,26 @@ namespace OdWyer.RTS
 
 		float AvoidDistance { get; }
 		float StopDistance { get; }
+
+		float Shield { get; }
+		int Armour { get; }
+		int MaxHealth { get; }
+		int MaxSupply { get; }
+
+		string ShieldEffectID { get; }
+		string DeathEffectID { get; }
 	}
 
-	[RequireComponent(typeof(Rigidbody)), RequireComponent(typeof(MovementBehaviour)), RequireComponent(typeof(TargetingBehaviour))]
+	[RequireComponent(typeof(MovementBehaviour)), RequireComponent(typeof(TargetingBehaviour))]
 	public class Unit : PlayerControlled
 		,IUnitValues
 	{
-		private Rigidbody _rigidBody = null;
-		private Rigidbody Rigidbody => _rigidBody ? _rigidBody : (_rigidBody = GetComponent<Rigidbody>());
-
-
 		public bool upgWeaponActivatable = false;
 
 		private Loadout_Unit loadout;
 
 		public Loadable_Hull loadable;
 		public List<Weapon> weapons = new List<Weapon>();
-
-		public int currentKills = 0;
-
-		public override string Name => loadout.Loadout_Name;
-
-		public override int Health => Mathf.CeilToInt(loadable.health + (loadable.healthFromArmour * loadout.armourLevel));
-		public float Shield => loadable.shield + (loadable.shieldFromArmour * loadout.armourLevel);
-		public override int Supply => Mathf.CeilToInt(loadable.supply + (loadable.supplyFromSupply * loadout.supplyLevel));
-
-
-		public int armourLevel => loadout.armourLevel;
-		public int supplyLevel => loadout.supplyLevel;
-
-		public int Sensor => -1;
-
     
 		public float DamPerSec => weapons.Sum(w => w.fireRate * w.volley * w.weaponDamage);
 		public float SupPerSec => weapons.Sum(w => w.fireRate * w.volley * w.supplyDrain);
@@ -61,6 +50,13 @@ namespace OdWyer.RTS
 		public float AvoidDistance => GetComponent<CapsuleCollider>().radius * 1.1f;
 		public float StopDistance => loadable.stopDist;
 
+		public float Shield => loadable.shield + (loadable.shieldFromArmour * loadout.armourLevel);
+		public int Armour => loadout.armourLevel;
+		public int MaxHealth => Mathf.CeilToInt(loadable.health + (loadable.healthFromArmour * loadout.armourLevel));
+		public int MaxSupply => Mathf.CeilToInt(loadable.supply + (loadable.supplyFromSupply * loadout.supplyLevel));
+
+		public string ShieldEffectID => loadable.shieldHit;
+		public string DeathEffectID => loadable.deathEffect;
 
 
 		public Unit SetHull(Loadable_Hull loading)
@@ -136,63 +132,10 @@ namespace OdWyer.RTS
 			return this;
 		}
 		
-		public void KilledTarget() => currentKills++;
-
-		public override bool Damage(int damage, float[] armorBonus, Vector3 hitPoint)
-		{
-			ParticleSystem hitEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(loadable.shieldHit);
-			hitEffect.transform.position = hitPoint;
-			hitEffect.transform.rotation = Quaternion.LookRotation(transform.position - hitPoint);
-			Destroy (hitEffect.gameObject, 1f);
-		
-			ParticleSystem.MainModule main = hitEffect.main;
-			main.startSpeed = damage / 10;
-
-			hitEffect.Emit(damage * damage);
-		
-			float modifier = 1f - (Shield / 100) + (armorBonus[armourLevel] / 100);
-			damage = Mathf.CeilToInt(damage * modifier);
-
-			AddCollisionTorque(hitPoint, damage);
-
-			if (CurrentHealth == 0)
-				return false;
-
-			if (CurrentHealth > damage)
-			{
-				damageTaken += damage;
-				return false;
-			}
-
-			damageTaken = Mathf.Infinity;
-
-			EndSelf();
-			return true;
-		}
-
-		public void AddCollisionTorque(Vector3 hitPoint, float force)
-		{
-			Vector3 torque = (transform.position - hitPoint).normalized * force;
-			torque.x = torque.z;
-			Rigidbody.AddTorque(torque);
-		}
-
-		public void SupplyBurn(int supplies) => supplyDrained += supplies;
-
-		public override void EndSelf()
+		public override void BeforeDestroy()
 		{
 			Selected(false);
-
-			ParticleSystem dieEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(loadable.deathEffect);
-			dieEffect.transform.position = transform.position;
-			dieEffect.transform.rotation = transform.rotation;
-			dieEffect.Emit(150);
-			Destroy (dieEffect.gameObject, 2f);
-
-			foreach (Weapon wp in weapons)
-				wp.EndNow();
-
-			base.EndSelf();
+			base.BeforeDestroy();
 		}
 	}
 }

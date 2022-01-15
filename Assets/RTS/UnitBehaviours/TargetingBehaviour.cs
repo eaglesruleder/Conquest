@@ -24,6 +24,10 @@ namespace OdWyer.RTS
 		}	}
 
 
+		public int currentKills = 0;
+		public void KilledTarget() => currentKills++;
+
+
 		public void SetTarget(PlayerControlled target)
 		{
 			targetObj = target;
@@ -55,20 +59,20 @@ namespace OdWyer.RTS
 				targetAim = (targetObj.transform.position - transform.position).normalized;
 
 			bool aimLock = Vector3.Angle(AimTransform.forward, targetAim) < 5;
+			if(!aimLock)
+			{
+				AimTransform.rotation = Quaternion.Slerp
+					(AimTransform.rotation
+					,Quaternion.LookRotation(targetAim)
+					,Time.deltaTime * 2
+					);
+
+				foreach (Weapon w in GetComponentsInChildren<Weapon>())
+					w.AimTarget(AimTransform.forward);
+			}
+
 			foreach (Weapon w in GetComponentsInChildren<Weapon>())
 				w.Fire(targetObj && aimLock);
-
-			if (aimLock)
-				return;
-
-			AimTransform.rotation = Quaternion.Slerp
-				(AimTransform.rotation
-				,Quaternion.LookRotation(targetAim)
-				,Time.deltaTime * 2
-				);
-
-			foreach (Weapon w in GetComponentsInChildren<Weapon>())
-				w.AimTarget(AimTransform.forward);
 		}
 	}
 }

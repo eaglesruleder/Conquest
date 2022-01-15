@@ -34,15 +34,25 @@ public class GUISelectedUnit : MonoBehaviour {
         }
     }
 
-    void Update()
+    public void Update()
     {
-        if(selected is Unit)
-        {
-            selectedTitle.text = selected.name;
-            selectedKills.text = ((Unit) selected).currentKills.ToString();
-            selectedHealth.text = selected.CurrentHealth.ToString() + "/" + ((Unit)selected).Health.ToString();
-            selectedSupplies.text = ((Unit)selected).CurrentSupply.ToString() + "/" + ((Unit)selected).Supply.ToString();
-        }
+		if (!selected)
+			return;
+
+		selectedTitle.text = selected.name;
+
+		HullBehaviour hull = selected.GetComponent<HullBehaviour>();
+		if (hull)
+		{
+			IUnitValues values = selected.GetComponent<IUnitValues>();
+
+			selectedHealth.text = hull.CurrentHealth.ToString() + "/" + values.MaxHealth.ToString();
+			selectedSupplies.text = hull.CurrentSupply.ToString() + "/" + values.MaxSupply.ToString();
+		}
+
+		TargetingBehaviour targeting = selected.GetComponent<TargetingBehaviour>();
+		if(targeting)
+			selectedKills.text = targeting.currentKills.ToString();
     }
 
     public void ActivateSubPanel(GameObject SubPanel)

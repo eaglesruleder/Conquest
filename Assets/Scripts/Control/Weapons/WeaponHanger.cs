@@ -3,8 +3,12 @@
 using OdWyer.RTS;
 
 public class WeaponHanger : Weapon
+	, IUnitLifecycle
 {
-    //	WeaponHanger Values
+	private HullBehaviour _hull = null;
+	private HullBehaviour Hull => _hull ? _hull : (_hull = GetComponentInParent<HullBehaviour>());
+
+	//	WeaponHanger Values
 	Loadable_Weapon.LW_Hanger loadableHanger
 		{get{return (Loadable_Weapon.LW_Hanger)loadable;}}
 	internal int	noSquadrons		{get{return loadableHanger.noSquadrons;}}
@@ -61,7 +65,7 @@ public class WeaponHanger : Weapon
                     pause = Time.time + fireRate;
 
 					//	Burn supplies
-                    unitData.SupplyBurn(supplyDrain);
+                    Hull.SupplyBurn(supplyDrain);
 
 					break;
                 }
@@ -72,13 +76,9 @@ public class WeaponHanger : Weapon
 	public override void Fire(bool firing)
 	{}
 
-    public override void EndNow()
+    public void BeforeDestroy()
     {
-		//	Destroy all projectiles
         foreach(ProjectileFighter squad in squadrons)
-        {
             squad.EndNow();
-        }
-		base.EndNow ();
     }
 }
