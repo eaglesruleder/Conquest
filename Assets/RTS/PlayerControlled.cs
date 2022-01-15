@@ -2,7 +2,6 @@
 
 namespace OdWyer.RTS
 {
-	[RequireComponent(typeof(IsVisibleTracker))]
 	public abstract class PlayerControlled : MonoBehaviour
 	{
 		public abstract string Name { get; }

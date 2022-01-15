@@ -2,6 +2,7 @@
 
 using OdWyer.RTS;
 
+[RequireComponent(typeof(IsVisibleTracker))]
 public class MeshHandler : MonoBehaviour {
 
 	public Mesh MeshLow;

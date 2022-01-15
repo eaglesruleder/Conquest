@@ -15,7 +15,7 @@ namespace OdWyer.Control
 
         public static List<PlayerControlled> PlayerOnScreen =>
 			IsVisibleTracker.OnScreen
-				.Select(ivt => ivt.GetComponent<PlayerControlled>())
+				.Select(ivt => ivt.GetComponentInParent<PlayerControlled>())
 				.Where(pc =>
 					pc
 				&&	pc.playerID == PlayerManager.ThisPlayerID
