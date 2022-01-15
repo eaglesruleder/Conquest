@@ -157,7 +157,6 @@ namespace OdWyer.RTS
 
 			damageTaken = Mathf.Infinity;
 
-			OnBecameInvisible();
 			Selected(false);
 
 			Vector3 torque = (transform.position - hitPoint).normalized * damage;
