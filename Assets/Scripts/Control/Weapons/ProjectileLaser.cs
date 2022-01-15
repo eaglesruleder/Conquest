@@ -65,7 +65,9 @@ public class ProjectileLaser : Projectile {
         }
 
 		//	Hit the target (instant)
-        target.Damage(damage, ArmourBonus, collisionPosition);
+		HullBehaviour targetHull = target.GetComponent<HullBehaviour>();
+		if(targetHull)
+			targetHull.Damage(damage, ArmourBonus, collisionPosition);
     }
 
     public override void EndNow()

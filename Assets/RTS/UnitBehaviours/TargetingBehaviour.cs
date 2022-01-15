@@ -1,16 +1,11 @@
-﻿using System.Collections.Generic;
-
-using UnityEngine; 
+﻿using UnityEngine; 
 
 namespace OdWyer.RTS
 {
 	public class TargetingBehaviour : MonoBehaviour
 	{
-		private Unit _unit = null;
-		public Unit Unit => _unit ? _unit : (_unit = GetComponent<Unit>());
-
-		public List<Weapon> weapons => Unit.weapons;
-
+		private IUnitValues _values = null;
+		private IUnitValues Values => _values is null ? (_values = GetComponent<IUnitValues>()) : _values;
 
 		public PlayerControlled targetObj = null;
 
@@ -29,20 +24,24 @@ namespace OdWyer.RTS
 		}	}
 
 
+		public int currentKills = 0;
+		public void KilledTarget() => currentKills++;
+
+
 		public void SetTarget(PlayerControlled target)
 		{
 			targetObj = target;
-			foreach (Weapon weapon in weapons)
+			foreach (Weapon weapon in GetComponentsInChildren<Weapon>())
 				weapon.SetTarget(targetObj);
 		}
 
 		private void FindTarget()
 		{
-			Collider[] colliders = Physics.OverlapSphere(transform.position, Unit.EngageDistance);
+			Collider[] colliders = Physics.OverlapSphere(transform.position, Values.EngageDistance);
 			foreach (Collider c in colliders)
 			{
 				PlayerControlled pc = c.GetComponent<PlayerControlled>();
-				if (pc && pc.playerID != Unit.playerID)
+				if (pc && pc.playerID != Values.FactionID)
 				{
 					SetTarget(pc);
 					return;
@@ -60,20 +59,20 @@ namespace OdWyer.RTS
 				targetAim = (targetObj.transform.position - transform.position).normalized;
 
 			bool aimLock = Vector3.Angle(AimTransform.forward, targetAim) < 5;
-			foreach (Weapon w in weapons)
+			if(!aimLock)
+			{
+				AimTransform.rotation = Quaternion.Slerp
+					(AimTransform.rotation
+					,Quaternion.LookRotation(targetAim)
+					,Time.deltaTime * 2
+					);
+
+				foreach (Weapon w in GetComponentsInChildren<Weapon>())
+					w.AimTarget(AimTransform.forward);
+			}
+
+			foreach (Weapon w in GetComponentsInChildren<Weapon>())
 				w.Fire(targetObj && aimLock);
-
-			if (aimLock)
-				return;
-
-			AimTransform.rotation = Quaternion.Slerp
-				(AimTransform.rotation
-				,Quaternion.LookRotation(targetAim)
-				,Time.deltaTime * 2
-				);
-
-			foreach (Weapon w in weapons)
-				w.AimTarget(AimTransform.forward);
 		}
 	}
 }

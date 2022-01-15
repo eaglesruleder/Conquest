@@ -75,24 +75,20 @@ public abstract class Projectile : MonoBehaviour {
 
     public virtual void OnTriggerEnter(Collider hit)
     {
-		//	If we collide with a PlayerControlled
         PlayerControlled hitObj = hit.GetComponent<PlayerControlled>();
         if (hitObj)
         {
 			//	(If there is a target, is the object the target), else is the targeted team when that team is not the current team
 			if (((target) ? hitObj.Equals(target) : false) ? true : (targetPlayerID.Equals(hitObj.playerID) && !launcherPlayerID.Equals(hitObj.playerID)))
             {
-				//	Damage the object, and if successfully kills it
-                if (hitObj.Damage(damage, armourBonus, transform.position))
+				HullBehaviour targetHull = target.GetComponent<HullBehaviour>();
+				if (targetHull && targetHull.Damage(damage, armourBonus, transform.position))
                 {
-					//	And if launcher is unit
-                    if(launcher is Unit)
-                    {
-						//	Increment  kill count
-                        ((Unit)launcher).KilledTarget();
-                    }
+					TargetingBehaviour targetTargeting = target.GetComponent<TargetingBehaviour>();
+					if (targetTargeting)
+						targetTargeting.KilledTarget();
                 }
-				//	Then kill projectile
+				
                 EndNow();
             }
         }

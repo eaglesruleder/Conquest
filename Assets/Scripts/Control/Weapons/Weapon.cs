@@ -3,8 +3,11 @@
 using OdWyer.RTS;
 
 [System.Serializable]
-public class Weapon : MonoBehaviour 
+public class Weapon : MonoBehaviour
 {
+	private HullBehaviour _hull = null;
+	private HullBehaviour Hull => _hull ? _hull : (_hull = GetComponentInParent<HullBehaviour>());
+
 	//Weapon Values
 	internal Loadable_Weapon loadable;
 	
@@ -35,7 +38,7 @@ public class Weapon : MonoBehaviour
     public Unit unitData;
 	public Vector3 pitchEuler;
 
-    public virtual Weapon SetWeapon(Loadable_Weapon loading)
+	public virtual Weapon SetWeapon(Loadable_Weapon loading)
 	{
 		loadable = loading;
 		
@@ -146,9 +149,8 @@ public class Weapon : MonoBehaviour
 	        tempBullet.Initialise(targetObj, unitData, weaponDamage, armorBonus);
 
 			//	Burn supplies
-	        unitData.SupplyBurn(supplyDrain);
+			if(Hull)
+				Hull.SupplyBurn(supplyDrain);
 		}
     }
-
-    public virtual void EndNow() { }
 }
