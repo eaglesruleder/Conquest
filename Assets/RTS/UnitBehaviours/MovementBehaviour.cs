@@ -32,14 +32,6 @@ namespace OdWyer.RTS
 		}
 
 
-		public void AddCollisionTorque(Vector3 hitPoint, float force)
-		{
-			Vector3 torque = (transform.position - hitPoint).normalized * force;
-			torque.x = torque.z;
-			Rigidbody.AddTorque(torque);
-		}
-
-
 		public void SetMove(Vector3 position, bool force = false)
 		{
 			position.y = Mathf.Clamp(position.y, -20, 20);

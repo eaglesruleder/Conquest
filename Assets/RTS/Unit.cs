@@ -18,12 +18,12 @@ namespace OdWyer.RTS
 		float StopDistance { get; }
 	}
 
-	[RequireComponent(typeof(MovementBehaviour)), RequireComponent(typeof(TargetingBehaviour))]
+	[RequireComponent(typeof(Rigidbody)), RequireComponent(typeof(MovementBehaviour)), RequireComponent(typeof(TargetingBehaviour))]
 	public class Unit : PlayerControlled
 		,IUnitValues
 	{
-		private MovementBehaviour _movement = null;
-		private MovementBehaviour Movement => _movement ? _movement : (_movement = GetComponent<MovementBehaviour>());
+		private Rigidbody _rigidBody = null;
+		private Rigidbody Rigidbody => _rigidBody ? _rigidBody : (_rigidBody = GetComponent<Rigidbody>());
 
 
 		public bool upgWeaponActivatable = false;
@@ -153,6 +153,8 @@ namespace OdWyer.RTS
 			float modifier = 1f - (Shield / 100) + (armorBonus[armourLevel] / 100);
 			damage = Mathf.CeilToInt(damage * modifier);
 
+			AddCollisionTorque(hitPoint, damage);
+
 			if (CurrentHealth == 0)
 				return false;
 
@@ -164,18 +166,23 @@ namespace OdWyer.RTS
 
 			damageTaken = Mathf.Infinity;
 
-			Selected(false);
-
-			Movement.AddCollisionTorque(hitPoint, damage);
-
 			EndSelf();
 			return true;
+		}
+
+		public void AddCollisionTorque(Vector3 hitPoint, float force)
+		{
+			Vector3 torque = (transform.position - hitPoint).normalized * force;
+			torque.x = torque.z;
+			Rigidbody.AddTorque(torque);
 		}
 
 		public void SupplyBurn(int supplies) => supplyDrained += supplies;
 
 		public override void EndSelf()
 		{
+			Selected(false);
+
 			ParticleSystem dieEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(loadable.deathEffect);
 			dieEffect.transform.position = transform.position;
 			dieEffect.transform.rotation = transform.rotation;
