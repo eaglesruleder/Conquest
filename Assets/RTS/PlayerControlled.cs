@@ -31,7 +31,6 @@ namespace OdWyer.RTS
 
 		public virtual void EndSelf()
 		{
-			OnBecameInvisible();
 			Selected(false);
 			if (!IsInvoking("EndNow"))
 			{
@@ -41,13 +40,6 @@ namespace OdWyer.RTS
 		public virtual void EndNow()
 		{
 			Destroy(gameObject);
-		}
-
-		public void OnBecameInvisible() => PCSelector.OffScreen(this);
-		public void OnBecameVisible()
-		{
-			if (CurrentHealth > 0)
-				PCSelector.OnScreen(this);
 		}
 
 		public abstract void SetTarget(PlayerControlled Target);

@@ -67,20 +67,4 @@ public class MeshHandler : MonoBehaviour {
             throw new UnityEngine.UnityException("MeshHandler switched without Meshes");
         }
     }
-
-	void OnBecameInvisible()
-	{
-		if (transform.parent.gameObject.GetComponent<PlayerControlled> ())
-		{
-			transform.parent.gameObject.GetComponent<PlayerControlled> ().OnBecameInvisible();
-		}
-	}
-
-	void OnBecameVisible()
-	{
-		if (transform.parent.gameObject.GetComponent<PlayerControlled> ())
-		{
-			transform.parent.gameObject.GetComponent<PlayerControlled> ().OnBecameVisible();
-		}
-	}
 }

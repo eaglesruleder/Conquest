@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -12,17 +13,15 @@ namespace OdWyer.Control
     {
         static PCSelector thisPlayer;
 
-        Dictionary<string, List<PlayerControlled>> onScreen = new Dictionary<string, List<PlayerControlled>>();
-        public static List<PlayerControlled> PlayerOnScreen
-        {
-            get
-            {
-                if (!thisPlayer.onScreen.ContainsKey(PlayerManager.ThisPlayerID))
-                    return new List<PlayerControlled>();
-
-                return thisPlayer.onScreen[PlayerManager.ThisPlayerID];
-            }
-        }
+        public static List<PlayerControlled> PlayerOnScreen =>
+			IsVisibleTracker.OnScreen
+				.Select(ivt => ivt.GetComponent<PlayerControlled>())
+				.Where(pc =>
+					pc
+				&&	pc.playerID == PlayerManager.ThisPlayerID
+				&&	pc.CurrentHealth > 0
+					)
+				.ToList();
 
         public static PlayerControlled selectedObject;
         public static List<PlayerControlled> selectedObjects;
@@ -53,7 +52,6 @@ namespace OdWyer.Control
                 thisPlayer = this;
 
                 selectedObjects = new List<PlayerControlled>();
-                onScreen.Add(PlayerManager.ThisPlayerID, new List<PlayerControlled>());
             }
             else
             {
@@ -357,30 +355,6 @@ namespace OdWyer.Control
                 _mouseEnd = Vector2.zero;
                 _vecRightStart = Vector3.zero;
                 _vecRightEnd = Vector3.zero;
-            }
-        }
-
-        //	Global accessor to add a pc to test list when the MeshHandler OnBecameVisible()
-        public static void OnScreen(PlayerControlled pc)
-        {
-            List<PlayerControlled> result;
-            if (thisPlayer.onScreen.TryGetValue(pc.playerID, out result))
-            {
-                result.Add(pc);
-            }
-            else
-            {
-                thisPlayer.onScreen.Add(pc.playerID, new List<PlayerControlled>() { pc });
-            }
-        }
-
-        //	Global accessor to remove a pc from the test list when the MeshHandler OnBecameVisible()
-        public static void OffScreen(PlayerControlled pc)
-        {
-            List<PlayerControlled> result;
-            if (thisPlayer.onScreen.TryGetValue(pc.playerID, out result))
-            {
-                result.Remove(pc);
             }
         }
 
