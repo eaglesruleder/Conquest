@@ -2,29 +2,11 @@
 
 namespace OdWyer.RTS
 {
-	public interface IUnitValues
-	{
-		float Speed { get; }
-		float TurnSpeed { get; }
-
-		float AvoidDistance { get; }
-		float StopDistance { get; }
-	}
-
 	[RequireComponent(typeof(HullBehaviour)), RequireComponent(typeof(MovementBehaviour)), RequireComponent(typeof(TargetingBehaviour))]
 	public class Unit : PlayerControlled
-		,IUnitValues
 	{
 		private Loadout_Unit loadout;
 		public Loadable_Hull loadable;
-
-		// Ratio for actual to game is 1:100 as Vector3.MoveTowards()
-		// Ratio for actual to game is 1:50,000? as Rigidbody.velocity
-		public float Speed => loadable.engine * Time.deltaTime / 100f;
-		public float TurnSpeed => 2;
-		public float AvoidDistance => GetComponent<CapsuleCollider>().radius * 1.1f;
-		public float StopDistance => loadable.stopDist;
-
 
 		public Unit SetHull(Loadable_Hull loading)
 		{
@@ -32,20 +14,11 @@ namespace OdWyer.RTS
 
 			gameObject.name = loadable.Loadable_Name;
 
-			if (!SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.selectionObj))
-				throw new UnityException("MeshHandler " + loadable.selectionObj + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
-
-			if (!SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.Loadable_Mesh))
-				throw new UnityException("MeshHandler " + loadable.Loadable_Mesh + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
-
-			if (!SelectableLoadout.ForgeAvailable<ParticleSystem>(loadable.shieldHit))
-				throw new UnityException("ParticleSystem " + loadable.shieldHit + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
-
-			if (!SelectableLoadout.ForgeAvailable<ParticleSystem>(loadable.deathEffect))
-				throw new UnityException("ParticleSystem " + loadable.deathEffect + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
-
 			if(!SelectionObj)
 			{
+				if (!SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.selectionObj))
+					throw new UnityException("MeshHandler " + loadable.selectionObj + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
+
 				SelectionObj = ((MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.selectionObj)).gameObject;
 				SelectionObj.transform.parent = transform;
 				SelectionObj.transform.localPosition = Vector3.zero;
@@ -53,15 +26,22 @@ namespace OdWyer.RTS
 				Selected(false);
 			}
 
-			MeshHandler hullobj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.Loadable_Mesh);
-			hullobj.transform.parent = transform;
-			hullobj.transform.localPosition = Vector3.zero;
-			hullobj.transform.localRotation = Quaternion.identity;
+			if(!Hull)
+			{
+				if (!SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.Loadable_Mesh))
+					throw new UnityException("MeshHandler " + loadable.Loadable_Mesh + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
+
+				MeshHandler hullobj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.Loadable_Mesh);
+				hullobj.transform.parent = transform;
+				hullobj.transform.localPosition = Vector3.zero;
+				hullobj.transform.localRotation = Quaternion.identity;
+			}
 
 			loadable.Loadable_Collider.AddComponent(gameObject);
 
 			Config_HullBehaviour(loadable);
 			Config_TargetingBehaviour(loadable);
+			Config_MovementBehaviour(loadable);
 
 			return this;
 		}
@@ -135,6 +115,16 @@ namespace OdWyer.RTS
 		private void Config_TargetingBehaviour(Loadable_Hull config)
 		{
 			Targeting.FactionID = PlayerManager.ThisPlayerID;
+		}
+
+
+		private MovementBehaviour _movement = null;
+		public MovementBehaviour Movement => _movement ? _movement : (_movement = GetComponent<MovementBehaviour>());
+
+		private void Config_MovementBehaviour(Loadable_Hull config)
+		{
+			Movement.Speed = config.engine / 10f;
+			Movement.StopDistance = config.stopDist;
 		}
 	}
 }
