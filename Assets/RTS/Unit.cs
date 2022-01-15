@@ -43,10 +43,6 @@ namespace OdWyer.RTS
 		public float StopDistance => loadable.stopDist;
 
 
-		private HullBehaviour _hull = null;
-		public HullBehaviour Hull => _hull ? _hull : (_hull = GetComponent<HullBehaviour>());
-
-
 		public Unit SetHull(Loadable_Hull loading)
 		{
 			loadable = loading;
@@ -78,22 +74,8 @@ namespace OdWyer.RTS
 			hullobj.transform.parent = transform;
 			hullobj.transform.localPosition = Vector3.zero;
 			hullobj.transform.localRotation = Quaternion.identity;
-			
-			Hull.BaseShield = loadable.shield;
-			Hull.ShieldFromArmour = loadable.shieldFromArmour;
 
-			Hull.BaseHealth = loadable.health;
-			Hull.HealthFromArmour = loadable.healthFromArmour;
-
-			Hull.BaseSupply = loadable.supply;
-			Hull.SupplyFromSupply = loadable.supplyFromSupply;
-
-			if (!Hull.ShieldEffect)
-				Hull.ShieldEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(loadable.shieldHit);
-
-			if (!Hull.DeathEffect)
-				Hull.DeathEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(loadable.deathEffect);
-
+			Config_HullBehaviour(loadable);
 
 			loadable.Loadable_Collider.AddComponent(gameObject);
 		
@@ -108,8 +90,7 @@ namespace OdWyer.RTS
 			loadout = loading;
 			gameObject.name = loadout.Loadout_Name;
 
-			Hull.ArmourLevel = loadout.armourLevel;
-			Hull.SupplyLevel = loadout.supplyLevel;
+			Config_HullBehaviour(loading);
 
 			foreach (Loadout.WeaponPos wp in loadout.weapons)
 			{
@@ -139,6 +120,34 @@ namespace OdWyer.RTS
 			}
 
 			return this;
+		}
+
+
+		private HullBehaviour _hull = null;
+		public HullBehaviour Hull => _hull ? _hull : (_hull = GetComponent<HullBehaviour>());
+
+		private void Config_HullBehaviour(Loadable_Hull config)
+		{
+			Hull.BaseShield = config.shield;
+			Hull.ShieldFromArmour = config.shieldFromArmour;
+
+			Hull.BaseHealth = config.health;
+			Hull.HealthFromArmour = config.healthFromArmour;
+
+			Hull.BaseSupply = config.supply;
+			Hull.SupplyFromSupply = config.supplyFromSupply;
+
+			if (!Hull.ShieldEffect)
+				Hull.ShieldEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(config.shieldHit);
+
+			if (!Hull.DeathEffect)
+				Hull.DeathEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(config.deathEffect);
+		}
+
+		private void Config_HullBehaviour(Loadout_Unit config)
+		{
+			Hull.ArmourLevel = loadout.armourLevel;
+			Hull.SupplyLevel = loadout.supplyLevel;
 		}
 	}
 }
