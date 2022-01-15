@@ -16,17 +16,9 @@ namespace OdWyer.RTS
 
 		float AvoidDistance { get; }
 		float StopDistance { get; }
-
-		float Shield { get; }
-		int Armour { get; }
-		int MaxHealth { get; }
-		int MaxSupply { get; }
-
-		string ShieldEffectID { get; }
-		string DeathEffectID { get; }
 	}
 
-	[RequireComponent(typeof(MovementBehaviour)), RequireComponent(typeof(TargetingBehaviour))]
+	[RequireComponent(typeof(HullBehaviour)), RequireComponent(typeof(MovementBehaviour)), RequireComponent(typeof(TargetingBehaviour))]
 	public class Unit : PlayerControlled
 		,IUnitValues
 	{
@@ -50,11 +42,9 @@ namespace OdWyer.RTS
 		public float AvoidDistance => GetComponent<CapsuleCollider>().radius * 1.1f;
 		public float StopDistance => loadable.stopDist;
 
-		public float Shield => loadable.shield + (loadable.shieldFromArmour * loadout.armourLevel);
-		public int Armour => loadout.armourLevel;
 
-		public string ShieldEffectID => loadable.shieldHit;
-		public string DeathEffectID => loadable.deathEffect;
+		private HullBehaviour _hull = null;
+		public HullBehaviour Hull => _hull ? _hull : (_hull = GetComponent<HullBehaviour>());
 
 
 		public Unit SetHull(Loadable_Hull loading)
@@ -89,15 +79,22 @@ namespace OdWyer.RTS
 			hullobj.transform.localPosition = Vector3.zero;
 			hullobj.transform.localRotation = Quaternion.identity;
 			
-			HullBehaviour hull = hullobj.GetComponent<HullBehaviour>();
-			hull.BaseHealth = loadable.health;
-			hull.HealthFromArmour = loadable.healthFromArmour;
-			hull.ArmourLevel = loadout.armourLevel;
+			Hull.BaseShield = loadable.shield;
+			Hull.ShieldFromArmour = loadable.shieldFromArmour;
 
-			hull.BaseSupply = loadable.supply;
-			hull.SupplyFromSupply = loadable.supplyFromSupply;
-			hull.SupplyLevel = loadout.supplyLevel;
-        
+			Hull.BaseHealth = loadable.health;
+			Hull.HealthFromArmour = loadable.healthFromArmour;
+
+			Hull.BaseSupply = loadable.supply;
+			Hull.SupplyFromSupply = loadable.supplyFromSupply;
+
+			if (!Hull.ShieldEffect)
+				Hull.ShieldEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(loadable.shieldHit);
+
+			if (!Hull.DeathEffect)
+				Hull.DeathEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(loadable.deathEffect);
+
+
 			loadable.Loadable_Collider.AddComponent(gameObject);
 		
 			return this;
@@ -109,8 +106,10 @@ namespace OdWyer.RTS
 				throw new UnityException("hullID " + loadable.Loadable_ID + " does not match PlayerLoadout.UnitLoadout " + loading.Loadout_Hull);
 
 			loadout = loading;
-
 			gameObject.name = loadout.Loadout_Name;
+
+			Hull.ArmourLevel = loadout.armourLevel;
+			Hull.SupplyLevel = loadout.supplyLevel;
 
 			foreach (Loadout.WeaponPos wp in loadout.weapons)
 			{
