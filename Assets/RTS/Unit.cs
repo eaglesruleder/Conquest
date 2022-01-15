@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-using UnityEngine; 
+﻿using UnityEngine; 
 
 namespace OdWyer.RTS
 {
@@ -18,15 +15,8 @@ namespace OdWyer.RTS
 	public class Unit : PlayerControlled
 		,IUnitValues
 	{
-		public bool upgWeaponActivatable = false;
-
 		private Loadout_Unit loadout;
-
 		public Loadable_Hull loadable;
-		public List<Weapon> weapons = new List<Weapon>();
-    
-		public float DamPerSec => weapons.Sum(w => w.fireRate * w.volley * w.weaponDamage);
-		public float SupPerSec => weapons.Sum(w => w.fireRate * w.volley * w.supplyDrain);
 
 		// Ratio for actual to game is 1:100 as Vector3.MoveTowards()
 		// Ratio for actual to game is 1:50,000? as Rigidbody.velocity
@@ -98,21 +88,14 @@ namespace OdWyer.RTS
 			
 				points -= temp.points;
 				if(points < 0)
-				{
-					foreach(Weapon w in weapons)
-						Destroy(w.gameObject);
-					throw new UnityException("Points overdraw on " + loadout.Loadout_ID);
-				}
+					Debug.LogWarning("Points overdraw on " + loadout.Loadout_ID);
 			
 				temp.transform.parent = transform;
 				temp.transform.localPosition = wp.position.Convert;
 				temp.SetUnit(this);
-			
-				weapons.Add(temp);
 			}
 
 			Config_HullBehaviour(loading);
-			Config_TargetingBehaviour(loading);
 
 			return this;
 		}
@@ -152,11 +135,6 @@ namespace OdWyer.RTS
 		private void Config_TargetingBehaviour(Loadable_Hull config)
 		{
 			Targeting.FactionID = PlayerManager.ThisPlayerID;
-		}
-
-		private void Config_TargetingBehaviour(Loadout_Unit config)
-		{
-			Targeting.EngageDistance = weapons.Max(w => w.engageDistance);
 		}
 	}
 }

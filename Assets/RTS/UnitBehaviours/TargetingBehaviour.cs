@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine; 
 
@@ -7,9 +8,9 @@ namespace OdWyer.RTS
 	public class TargetingBehaviour : MonoBehaviour
 	{
 		public string FactionID = null;
-		public float EngageDistance = 0;
 
-		public TargetingBehaviour targetObj = null;
+
+		public PlayerControlled targetObj = null;
 
 		private Transform _aimTransform = null;
 		private Transform AimTransform
@@ -27,13 +28,17 @@ namespace OdWyer.RTS
 
 
 		public IEnumerable<Weapon> Weapons => GetComponentsInChildren<Weapon>();
+		public float DamPerSec => Weapons.Sum(w => w.fireRate * w.volley * w.weaponDamage);
+		public float SupPerSec => Weapons.Sum(w => w.fireRate * w.volley * w.supplyDrain);
+
+		public float EngageDistance => Weapons.Max(w => w.engageDistance);
 
 
 		public int currentKills = 0;
 		public void KilledTarget() => currentKills++;
 
 
-		public void SetTarget(TargetingBehaviour target)
+		public void SetTarget(PlayerControlled target)
 		{
 			targetObj = target;
 			foreach (Weapon weapon in Weapons)
@@ -45,10 +50,11 @@ namespace OdWyer.RTS
 			Collider[] colliders = Physics.OverlapSphere(transform.position, EngageDistance);
 			foreach (Collider c in colliders)
 			{
+				PlayerControlled unit = c.GetComponent<PlayerControlled>();
 				TargetingBehaviour targeting = c.GetComponent<TargetingBehaviour>();
-				if (targeting && targeting.FactionID != FactionID)
+				if (unit && targeting && targeting.FactionID != FactionID)
 				{
-					SetTarget(targeting);
+					SetTarget(unit);
 					return;
 				}
 			}
@@ -59,7 +65,7 @@ namespace OdWyer.RTS
 			if (!targetObj)
 				return null;
 
-			if (Vector3.Distance(targetObj.transform.position, transform.position) < EngageDistance)
+			if (Vector3.Distance(targetObj.transform.position, transform.position) > EngageDistance)
 				return targetObj.transform.position;
 
 			return null;

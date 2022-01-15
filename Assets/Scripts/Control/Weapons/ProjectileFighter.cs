@@ -45,7 +45,10 @@ public class ProjectileFighter : Projectile {
     public void SetTarget(PlayerControlled Target)
     {
         target = Target;
-        targetPlayerID = (target) ? target.PlayerID : null;
+
+		TargetingBehaviour targeting = target.GetComponent<TargetingBehaviour>();
+		if(targeting)
+			targetPlayerID = targeting.FactionID;
 
         targetLocation = RandomLocation(engageDistance);
     }

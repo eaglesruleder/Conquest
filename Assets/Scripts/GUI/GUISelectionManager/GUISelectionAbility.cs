@@ -16,25 +16,20 @@ public class GUISelectionAbility : MonoBehaviour {
     public void UpdatePanel(PlayerControlled SelectedObject)
     {
         selected = SelectedObject;
-        if(selected is Unit)
+
+		TargetingBehaviour targeting = selected.GetComponent<TargetingBehaviour>();
+        if(targeting)
         {
             Unit temp = selected as Unit;
 
             DamSec.gameObject.SetActive(true);
-            DamSec.text = "" + temp.DamPerSec;
+            DamSec.text = "" + targeting.DamPerSec;
             SupSec.gameObject.SetActive(true);
-            SupSec.text = "" + temp.SupPerSec;
+            SupSec.text = "" + targeting.SupPerSec;
             Range.gameObject.SetActive(true);
-            Range.text = "" + temp.EngageDistance;
+            Range.text = "" + targeting.EngageDistance;
 
-            if(temp.upgWeaponActivatable)
-            {
-                ActAbility.gameObject.SetActive(true);
-            }
-            else
-            {
-                ActAbility.gameObject.SetActive(false);
-            }
+            ActAbility.gameObject.SetActive(false);
         }
         else
         {

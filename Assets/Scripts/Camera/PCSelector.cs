@@ -18,7 +18,8 @@ namespace OdWyer.Control
 				.Select(ivt => ivt.GetComponentInParent<PlayerControlled>())
 				.Where(pc =>
 					pc
-				&&	pc.PlayerID == PlayerManager.ThisPlayerID
+				&&	pc.GetComponent<TargetingBehaviour>()
+				&&	pc.GetComponent<TargetingBehaviour>().FactionID == PlayerManager.ThisPlayerID
 				&&	pc.GetComponent<HullBehaviour>()
 				&&	pc.GetComponent<HullBehaviour>().CurrentHealth > 0
 					)
@@ -309,10 +310,11 @@ namespace OdWyer.Control
                         if (Physics.Raycast(ray, out hitOut))
                         {
                             PlayerControlled tempObj = hitOut.collider.gameObject.GetComponent<PlayerControlled>();
-                            if (tempObj != null)
+                            TargetingBehaviour tempTargeting = hitOut.collider.gameObject.GetComponent<TargetingBehaviour>();
+                            if (tempObj && tempTargeting)
                             {
                                 //	Determine if enemy or 'alt' override
-                                if (PlayerManager.ThisPlayerID != tempObj.PlayerID || (Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.LeftAlt)))
+                                if (PlayerManager.ThisPlayerID != tempTargeting.FactionID || (Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.LeftAlt)))
                                 {
                                     //	For each selected update target
                                     foreach (PlayerControlled i in selectedObjects)

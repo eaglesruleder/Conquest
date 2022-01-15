@@ -44,18 +44,28 @@ public abstract class Projectile : MonoBehaviour {
 	}
 	
 	public virtual void Initialise(PlayerControlled Target, PlayerControlled Launcher, int Damage, float[] ArmourBonus)
-		{
+	{
 		target = Target;
-        targetPlayerID = (target) ? target.PlayerID : "";
+		if(target)
+		{
+			TargetingBehaviour targetTargeting = target.GetComponent<TargetingBehaviour>();
+			if (targetTargeting)
+				targetPlayerID = targetTargeting.FactionID;
+		}
 
 		launcher = Launcher;
-        launcherPlayerID = (launcher) ? launcher.PlayerID : "";
+		if(launcher)
+		{
+			TargetingBehaviour launcherTargeting = launcher.GetComponent<TargetingBehaviour>();
+			if (launcherTargeting)
+				launcherPlayerID = launcherTargeting.FactionID;
+		}
 
 		damage = Damage;
         armourBonus = ArmourBonus;
 
         Invoke("EndNow", life);
-		}
+	}
 
     public virtual void EndNow()
     {
@@ -78,8 +88,9 @@ public abstract class Projectile : MonoBehaviour {
         PlayerControlled hitObj = hit.GetComponent<PlayerControlled>();
         if (hitObj)
         {
+			TargetingBehaviour targeting = hitObj.GetComponent<TargetingBehaviour>();
 			//	(If there is a target, is the object the target), else is the targeted team when that team is not the current team
-			if (((target) ? hitObj.Equals(target) : false) ? true : (targetPlayerID.Equals(hitObj.PlayerID) && !launcherPlayerID.Equals(hitObj.PlayerID)))
+			if (((target) ? hitObj.Equals(target) : false) ? true : (targetPlayerID.Equals(targeting.FactionID) && !launcherPlayerID.Equals(targeting.FactionID)))
             {
 				HullBehaviour targetHull = target.GetComponent<HullBehaviour>();
 				if (targetHull && targetHull.Damage(damage, armourBonus, transform.position))

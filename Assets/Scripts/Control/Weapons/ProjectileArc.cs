@@ -48,9 +48,11 @@ public class ProjectileArc : ProjectileLaser {
 						foreach(Collider c in near)
 						{
 							PlayerControlled current = c.GetComponent<PlayerControlled>();
-							if(current)
+							TargetingBehaviour currentTargeting = c.GetComponent<TargetingBehaviour>();
+							TargetingBehaviour lastTargeting = last.GetComponent<TargetingBehaviour>();
+							if(current && lastTargeting && currentTargeting)
 							{
-								if(current.PlayerID == Target.PlayerID && !hit.Contains(current))
+								if(currentTargeting.FactionID == lastTargeting.FactionID && !hit.Contains(current))
 								{
 									if(!closest)
 									{
