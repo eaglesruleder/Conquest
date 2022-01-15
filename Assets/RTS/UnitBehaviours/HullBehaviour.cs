@@ -5,34 +5,58 @@ namespace OdWyer.RTS
 	[RequireComponent(typeof(Rigidbody))]
 	public class HullBehaviour : MonoBehaviour
 	{
-		private IUnitValues _values = null;
-		private IUnitValues Values => _values is null ? (_values = GetComponent<IUnitValues>()) : _values;
-
-
 		private Rigidbody _rigidBody = null;
 		private Rigidbody Rigidbody => _rigidBody ? _rigidBody : (_rigidBody = GetComponent<Rigidbody>());
 
 
-		internal float damageTaken = 0;
-		public int CurrentHealth => (damageTaken < Values.MaxHealth) ? Values.MaxHealth - (int)damageTaken : 0;
+		public int ArmourLevel = 0;
+		public int SupplyLevel = 0;
 
+
+		public float BaseShield = 0;
+		public float ShieldFromArmour = 0;
+		public float Shield => BaseShield + (ShieldFromArmour * ArmourLevel);
+
+
+		public int BaseHealth = 0;
+		public int HealthFromArmour = 0;
+		public int MaxHealth => Mathf.CeilToInt(BaseHealth + (HealthFromArmour * ArmourLevel));
+
+		internal float damageTaken = 0;
+		public int CurrentHealth => (damageTaken < MaxHealth) ? MaxHealth - (int)damageTaken : 0;
+
+
+		public int BaseSupply = 0;
+		public int SupplyFromSupply = 0;
+		public int MaxSupply => Mathf.CeilToInt(BaseSupply + (SupplyFromSupply * SupplyLevel));
 
 		internal float supplyDrained = 0;
-		public int CurrentSupply => (supplyDrained < Values.MaxSupply) ? Values.MaxSupply - (int)supplyDrained : 0;
+		public int CurrentSupply => (supplyDrained < MaxSupply) ? MaxSupply - (int)supplyDrained : 0;
+
+
+		public ParticleSystem ShieldEffect = null;
+		public ParticleSystem DeathEffect = null;
+
 
 		public bool Damage(int damage, float[] armorBonus, Vector3 hitPoint)
 		{
-			ParticleSystem hitEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(Values.ShieldEffectID);
-			hitEffect.transform.position = hitPoint;
-			hitEffect.transform.rotation = Quaternion.LookRotation(transform.position - hitPoint);
-			Destroy (hitEffect.gameObject, 1f);
-		
-			ParticleSystem.MainModule main = hitEffect.main;
-			main.startSpeed = damage / 10;
+			damage = Mathf.CeilToInt(damage * Shield * armorBonus[ArmourLevel]);
 
-			hitEffect.Emit(damage * damage);
+			if (ShieldEffect)
+			{
+				ParticleSystem hitEffect = Instantiate
+					(ShieldEffect
+					,hitPoint
+					,Quaternion.LookRotation(transform.position - hitPoint)
+					,transform
+					);
+				Destroy (hitEffect.gameObject, 1f);
 		
-			damage = Mathf.CeilToInt(damage * Values.Shield * armorBonus[Values.Armour]);
+				ParticleSystem.MainModule main = hitEffect.main;
+				main.startSpeed = damage / 10;
+
+				hitEffect.Emit(damage * damage);
+			}
 
 			AddCollisionTorque(hitPoint, damage);
 
@@ -62,11 +86,17 @@ namespace OdWyer.RTS
 
 		public void EndSelf()
 		{
-			ParticleSystem dieEffect = (ParticleSystem)SelectableLoadout.Forge<ParticleSystem>(Values.DeathEffectID);
-			dieEffect.transform.position = transform.position;
-			dieEffect.transform.rotation = transform.rotation;
-			dieEffect.Emit(150);
-			Destroy (dieEffect.gameObject, 2f);
+			if(DeathEffect)
+			{
+				ParticleSystem dieEffect = Instantiate
+					(DeathEffect
+					,transform.position
+					,transform.rotation
+					,transform
+					);
+				dieEffect.Emit(150);
+				Destroy (dieEffect.gameObject, 2f);
+			}
 
 			foreach (IUnitLifecycle lifecycle in GetComponentsInChildren<IUnitLifecycle>())
 				lifecycle.BeforeDestroy();

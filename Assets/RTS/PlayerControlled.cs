@@ -2,19 +2,15 @@
 
 namespace OdWyer.RTS
 {
-	public abstract class PlayerControlled : MonoBehaviour
+	public class PlayerControlled : MonoBehaviour
 		,IUnitLifecycle
 	{
-		public string playerID;
-
-		public MeshHandler SelectionObj;
-
-		public virtual void SetPlayer(string PlayerID) => playerID = PlayerID;
+		public GameObject SelectionObj;
 
 		public void Selected(bool Select)
 		{
 			if (SelectionObj)
-				SelectionObj.gameObject.SetActive(Select);
+				SelectionObj.SetActive(Select);
 		}
 
 		public virtual void BeforeDestroy()
@@ -23,6 +19,6 @@ namespace OdWyer.RTS
 			if (!IsInvoking("EndNow"))
 				Invoke("EndNow", 1f);
 		}
-		public virtual void EndNow() => Destroy(gameObject);
+		private void EndNow() => Destroy(gameObject);
 	}
 }

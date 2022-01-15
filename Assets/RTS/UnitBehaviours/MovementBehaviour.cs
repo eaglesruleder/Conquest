@@ -8,8 +8,11 @@ namespace OdWyer.RTS
 	[RequireComponent(typeof(Rigidbody))]
 	public class MovementBehaviour : MonoBehaviour
 	{
-		private IUnitValues _values = null;
-		private IUnitValues Values => _values is null ? (_values = GetComponent<IUnitValues>()) : _values;
+		public float Speed = 0;
+		public float TurnSpeed = 1;
+		public float StopDistance = 0;
+
+		public float AvoidDistance => GetComponent<CapsuleCollider>().radius * 1.1f;
 
 
 		private TargetingBehaviour _targeting = null;
@@ -35,14 +38,14 @@ namespace OdWyer.RTS
 		public void SetMove(Vector3 position, bool force = false)
 		{
 			position.y = Mathf.Clamp(position.y, -20, 20);
-			Collider[] col = Physics.OverlapSphere (position, Values.AvoidDistance, 1 << LayerMask.NameToLayer("Environment"));
+			Collider[] col = Physics.OverlapSphere (position, AvoidDistance, 1 << LayerMask.NameToLayer("Environment"));
 			foreach(Collider c in col)
 			{
 				Planet p = c.GetComponent<Planet>();
 				if (!p)
 					continue;
 				
-				float dist = c.GetComponent<CapsuleCollider>().radius + Values.AvoidDistance;
+				float dist = c.GetComponent<CapsuleCollider>().radius + AvoidDistance;
 				Vector3 dir = (position - c.transform.position).normalized;
 				position = c.transform.position + (dir * dist);
 			}
@@ -63,7 +66,7 @@ namespace OdWyer.RTS
 				Vector3 relPos = destPositions.Peek() - transform.position;
 				if (Physics.SphereCast
 					(new Ray(transform.position, relPos)
-					,Values.AvoidDistance
+					,AvoidDistance
 					,out RaycastHit checkHit
 					,Vector3.Distance(Vector3.zero, relPos)
 					,1 << LayerMask.NameToLayer("Environment")
@@ -83,20 +86,15 @@ namespace OdWyer.RTS
 				return;
 			}
 
-			if (Targeting && Targeting.targetObj)
-			{
-				Vector3 targetPos = Targeting.targetObj.transform.position;
-
-				if(Vector3.Distance(targetPos, transform.position) > Values.EngageDistance)
-					targetPosition = targetPos;
-			}
+			if (Targeting)
+				targetPosition = Targeting.GetTargetPosition();
 		}
 
 
 		public void Update()
 		{
 			if (targetPosition.HasValue
-			&&	Vector3.Distance(transform.position, targetPosition.Value) <= Values.StopDistance
+			&&	Vector3.Distance(transform.position, targetPosition.Value) <= StopDistance
 				)
 				targetPosition = null;
 
@@ -109,7 +107,7 @@ namespace OdWyer.RTS
 					transform.rotation = Quaternion.Slerp
 						(transform.rotation
 						,Quaternion.LookRotation(new Vector3(transform.forward.x, 0, transform.forward.z))
-						,Time.deltaTime * Values.TurnSpeed
+						,Time.deltaTime * TurnSpeed
 						);
 
 				return;
@@ -122,15 +120,15 @@ namespace OdWyer.RTS
 				engAngle = 90;
 			engAngle *= Mathf.Deg2Rad;
 
-			Rigidbody.MovePosition(transform.position + (targetDir * Mathf.Cos(engAngle) * Values.Speed));
+			Rigidbody.MovePosition(transform.position + (targetDir * Mathf.Cos(engAngle) * Speed * Time.deltaTime));
 			transform.rotation = Quaternion.Slerp
 				(transform.rotation
 				,Quaternion.LookRotation(targetDir)
-				,Time.deltaTime * Values.TurnSpeed
+				,Time.deltaTime * TurnSpeed
 				);
 		}
 
-		void OnCollisionStay(Collision hit)
+		public void OnCollisionStay(Collision hit)
 		{
 			Vector3 targetDir = hit.transform.position - transform.position;
 
@@ -139,7 +137,7 @@ namespace OdWyer.RTS
 				targetSide *= -1;
 
 			Vector3 newPos = transform.position - transform.forward;
-			transform.position = Vector3.MoveTowards(transform.position, newPos + targetSide, Values.Speed);
+			transform.position = Vector3.MoveTowards(transform.position, newPos + targetSide, Speed * Time.deltaTime);
 		}
 	}
 }

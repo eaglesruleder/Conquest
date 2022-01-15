@@ -44,10 +44,8 @@ public class GUISelectedUnit : MonoBehaviour {
 		HullBehaviour hull = selected.GetComponent<HullBehaviour>();
 		if (hull)
 		{
-			IUnitValues values = selected.GetComponent<IUnitValues>();
-
-			selectedHealth.text = hull.CurrentHealth.ToString() + "/" + values.MaxHealth.ToString();
-			selectedSupplies.text = hull.CurrentSupply.ToString() + "/" + values.MaxSupply.ToString();
+			selectedHealth.text = hull.CurrentHealth.ToString() + "/" + hull.MaxHealth.ToString();
+			selectedSupplies.text = hull.CurrentSupply.ToString() + "/" + hull.MaxSupply.ToString();
 		}
 
 		TargetingBehaviour targeting = selected.GetComponent<TargetingBehaviour>();

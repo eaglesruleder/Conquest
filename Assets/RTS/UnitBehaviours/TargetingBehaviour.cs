@@ -1,11 +1,14 @@
-﻿using UnityEngine; 
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using UnityEngine; 
 
 namespace OdWyer.RTS
 {
 	public class TargetingBehaviour : MonoBehaviour
 	{
-		private IUnitValues _values = null;
-		private IUnitValues Values => _values is null ? (_values = GetComponent<IUnitValues>()) : _values;
+		public string FactionID = null;
+
 
 		public PlayerControlled targetObj = null;
 
@@ -24,6 +27,13 @@ namespace OdWyer.RTS
 		}	}
 
 
+		public IEnumerable<Weapon> Weapons => GetComponentsInChildren<Weapon>();
+		public float DamPerSec => Weapons.Sum(w => w.fireRate * w.volley * w.weaponDamage);
+		public float SupPerSec => Weapons.Sum(w => w.fireRate * w.volley * w.supplyDrain);
+
+		public float EngageDistance => Weapons.Max(w => w.engageDistance);
+
+
 		public int currentKills = 0;
 		public void KilledTarget() => currentKills++;
 
@@ -31,22 +41,34 @@ namespace OdWyer.RTS
 		public void SetTarget(PlayerControlled target)
 		{
 			targetObj = target;
-			foreach (Weapon weapon in GetComponentsInChildren<Weapon>())
+			foreach (Weapon weapon in Weapons)
 				weapon.SetTarget(targetObj);
 		}
 
 		private void FindTarget()
 		{
-			Collider[] colliders = Physics.OverlapSphere(transform.position, Values.EngageDistance);
+			Collider[] colliders = Physics.OverlapSphere(transform.position, EngageDistance);
 			foreach (Collider c in colliders)
 			{
-				PlayerControlled pc = c.GetComponent<PlayerControlled>();
-				if (pc && pc.playerID != Values.FactionID)
+				PlayerControlled unit = c.GetComponent<PlayerControlled>();
+				TargetingBehaviour targeting = c.GetComponent<TargetingBehaviour>();
+				if (unit && targeting && targeting.FactionID != FactionID)
 				{
-					SetTarget(pc);
+					SetTarget(unit);
 					return;
 				}
 			}
+		}
+
+		public Vector3? GetTargetPosition()
+		{
+			if (!targetObj)
+				return null;
+
+			if (Vector3.Distance(targetObj.transform.position, transform.position) > EngageDistance)
+				return targetObj.transform.position;
+
+			return null;
 		}
 
 		public void Update()
@@ -67,12 +89,12 @@ namespace OdWyer.RTS
 					,Time.deltaTime * 2
 					);
 
-				foreach (Weapon w in GetComponentsInChildren<Weapon>())
-					w.AimTarget(AimTransform.forward);
+				foreach (Weapon weapon in Weapons)
+					weapon.AimTarget(AimTransform.forward);
 			}
 
-			foreach (Weapon w in GetComponentsInChildren<Weapon>())
-				w.Fire(targetObj && aimLock);
+			foreach (Weapon weapons in Weapons)
+				weapons.Fire(targetObj && aimLock);
 		}
 	}
 }

@@ -102,25 +102,18 @@ public class GUIAllSelectedUnits : MonoBehaviour {
 		{
 			reference = pc;
 
-			IUnitValues values = reference.GetComponent<IUnitValues>();
 			HullBehaviour hull = reference.GetComponent<HullBehaviour>();
-
-			health.maxValue = values.MaxHealth;
-
 			if(hull)
-				health.value = hull.CurrentHealth;
-			
-			if (reference is Unit)
 			{
-				supplies.gameObject.SetActive(true);
-				supplies.maxValue = values.MaxSupply;
-				if(hull)
-					supplies.value = hull.CurrentSupply;
+				health.maxValue = hull.MaxHealth;
+				health.value = hull.CurrentHealth;
+
+				supplies.gameObject.SetActive(hull.MaxSupply > 0);
+				supplies.maxValue = hull.MaxSupply;
+				supplies.value = hull.CurrentSupply;
 			}
 			else
-			{
 				supplies.gameObject.SetActive(false);
-			}
 		}
 
 		internal void UpdatePC()
