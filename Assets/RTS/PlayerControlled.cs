@@ -5,8 +5,6 @@ namespace OdWyer.RTS
 	public abstract class PlayerControlled : MonoBehaviour
 		,IUnitLifecycle
 	{
-		public string PlayerID;
-
 		public GameObject SelectionObj;
 
 		public void Selected(bool Select)

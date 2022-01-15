@@ -7,12 +7,8 @@ namespace OdWyer.RTS
 {
 	public interface IUnitValues
 	{
-		string FactionID { get; }
-
 		float Speed { get; }
 		float TurnSpeed { get; }
-
-		float EngageDistance { get; }
 
 		float AvoidDistance { get; }
 		float StopDistance { get; }
@@ -32,13 +28,10 @@ namespace OdWyer.RTS
 		public float DamPerSec => weapons.Sum(w => w.fireRate * w.volley * w.weaponDamage);
 		public float SupPerSec => weapons.Sum(w => w.fireRate * w.volley * w.supplyDrain);
 
-		public string FactionID => PlayerID;
-
 		// Ratio for actual to game is 1:100 as Vector3.MoveTowards()
 		// Ratio for actual to game is 1:50,000? as Rigidbody.velocity
 		public float Speed => loadable.engine * Time.deltaTime / 100f;
 		public float TurnSpeed => 2;
-		public float EngageDistance => weapons.Max(w => w.engageDistance);
 		public float AvoidDistance => GetComponent<CapsuleCollider>().radius * 1.1f;
 		public float StopDistance => loadable.stopDist;
 
@@ -75,10 +68,11 @@ namespace OdWyer.RTS
 			hullobj.transform.localPosition = Vector3.zero;
 			hullobj.transform.localRotation = Quaternion.identity;
 
-			Config_HullBehaviour(loadable);
-
 			loadable.Loadable_Collider.AddComponent(gameObject);
-		
+
+			Config_HullBehaviour(loadable);
+			Config_TargetingBehaviour(loadable);
+
 			return this;
 		}
 
@@ -89,8 +83,6 @@ namespace OdWyer.RTS
 
 			loadout = loading;
 			gameObject.name = loadout.Loadout_Name;
-
-			Config_HullBehaviour(loading);
 
 			foreach (Loadout.WeaponPos wp in loadout.weapons)
 			{
@@ -118,6 +110,9 @@ namespace OdWyer.RTS
 			
 				weapons.Add(temp);
 			}
+
+			Config_HullBehaviour(loading);
+			Config_TargetingBehaviour(loading);
 
 			return this;
 		}
@@ -148,6 +143,20 @@ namespace OdWyer.RTS
 		{
 			Hull.ArmourLevel = loadout.armourLevel;
 			Hull.SupplyLevel = loadout.supplyLevel;
+		}
+
+
+		private TargetingBehaviour _targeting = null;
+		public TargetingBehaviour Targeting => _targeting ? _targeting : (_targeting = GetComponent<TargetingBehaviour>());
+
+		private void Config_TargetingBehaviour(Loadable_Hull config)
+		{
+			Targeting.FactionID = PlayerManager.ThisPlayerID;
+		}
+
+		private void Config_TargetingBehaviour(Loadout_Unit config)
+		{
+			Targeting.EngageDistance = weapons.Max(w => w.engageDistance);
 		}
 	}
 }

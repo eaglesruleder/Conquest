@@ -83,13 +83,8 @@ namespace OdWyer.RTS
 				return;
 			}
 
-			if (Targeting && Targeting.targetObj)
-			{
-				Vector3 targetPos = Targeting.targetObj.transform.position;
-
-				if(Vector3.Distance(targetPos, transform.position) > Values.EngageDistance)
-					targetPosition = targetPos;
-			}
+			if (Targeting)
+				targetPosition = Targeting.GetTargetPosition();
 		}
 
 
