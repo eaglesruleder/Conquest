@@ -149,7 +149,8 @@ public class Weapon : MonoBehaviour
 	        tempBullet.Initialise(targetObj, unitData, weaponDamage, armorBonus);
 
 			//	Burn supplies
-	        Hull.SupplyBurn(supplyDrain);
+			if(Hull)
+				Hull.SupplyBurn(supplyDrain);
 		}
     }
 }

@@ -131,11 +131,5 @@ namespace OdWyer.RTS
 
 			return this;
 		}
-		
-		public override void BeforeDestroy()
-		{
-			Selected(false);
-			base.BeforeDestroy();
-		}
 	}
 }
