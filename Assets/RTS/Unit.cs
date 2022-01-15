@@ -95,15 +95,15 @@ namespace OdWyer.RTS
 			if (!loading.Loadout_Hull.Equals(loadable.Loadable_ID))
 				throw new UnityException("hullID " + loadable.Loadable_ID + " does not match PlayerLoadout.UnitLoadout " + loading.Loadout_Hull);
 
+			loadout = loading;
+
+			gameObject.name = loadout.Loadout_Name;
+
 			foreach (Loadout.WeaponPos wp in loadout.weapons)
 			{
 				if (!SelectableLoadout.ForgeAvailable<Weapon>(wp.weaponID))
 					throw new UnityException("weaponID " + wp.weaponID + " declared but not found on PlayerLoadout.UnitLoadout " + loadout.Loadout_ID);
 			}
-
-			loadout = loading;
-
-			gameObject.name = loadout.Loadout_Name;
 		
 			int points = loadable.points;
 		
