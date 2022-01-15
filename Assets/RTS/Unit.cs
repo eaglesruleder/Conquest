@@ -342,7 +342,7 @@ namespace OdWyer.RTS
 
 		public override void SetMove(Vector3 position, bool force = false)
 		{
-			position.y = Mathf.Clamp(position.y, 20, -20);
+			position.y = Mathf.Clamp(position.y, -20, 20);
 			Collider[] col = Physics.OverlapSphere (position, loadable.Loadable_Collider.height, 1 << LayerMask.NameToLayer("Environment"));
 			foreach(Collider c in col)
 			{
