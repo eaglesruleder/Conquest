@@ -5,8 +5,22 @@ using UnityEngine;
 
 namespace OdWyer.RTS
 {
+	public interface IUnitValues
+	{
+		string FactionID { get; }
+
+		float Speed { get; }
+		float TurnSpeed { get; }
+
+		float EngageDistance { get; }
+
+		float AvoidDistance { get; }
+		float StopDistance { get; }
+	}
+
 	[RequireComponent(typeof(MovementBehaviour)), RequireComponent(typeof(TargetingBehaviour))]
 	public class Unit : PlayerControlled
+		,IUnitValues
 	{
 		private MovementBehaviour _movement = null;
 		private MovementBehaviour Movement => _movement ? _movement : (_movement = GetComponent<MovementBehaviour>());
@@ -31,22 +45,24 @@ namespace OdWyer.RTS
 		public int armourLevel => loadout.armourLevel;
 		public int supplyLevel => loadout.supplyLevel;
 
-
-		// Ratio for actual to game is 1:100 as Vector3.MoveTowards()
-		// Ratio for actual to game is 1:50,000? as Rigidbody.velocity
-		public float Engine => loadable.engine * Time.deltaTime / 100f;
-		public float StopDist => loadable.stopDist;
-
-
-		// Multiply by 10 to make relative to gameworld
-		public float EngageDistance => weapons.Max(w => w.engageDistance) * 10;
 		public int Sensor => -1;
 
     
 		public float DamPerSec => weapons.Sum(w => w.fireRate * w.volley * w.weaponDamage);
 		public float SupPerSec => weapons.Sum(w => w.fireRate * w.volley * w.supplyDrain);
-	
-	
+
+		public string FactionID => playerID;
+
+		// Ratio for actual to game is 1:100 as Vector3.MoveTowards()
+		// Ratio for actual to game is 1:50,000? as Rigidbody.velocity
+		public float Speed => loadable.engine * Time.deltaTime / 100f;
+		public float TurnSpeed => 2;
+		public float EngageDistance => weapons.Max(w => w.engageDistance);
+		public float AvoidDistance => GetComponent<CapsuleCollider>().radius * 1.1f;
+		public float StopDistance => loadable.stopDist;
+
+
+
 		public Unit SetHull(Loadable_Hull loading)
 		{
 			loadable = loading;
