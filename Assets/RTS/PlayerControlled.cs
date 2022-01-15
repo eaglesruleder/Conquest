@@ -2,7 +2,7 @@
 
 namespace OdWyer.RTS
 {
-	public abstract class PlayerControlled : MonoBehaviour
+	public class PlayerControlled : MonoBehaviour
 		,IUnitLifecycle
 	{
 		public GameObject SelectionObj;
@@ -19,6 +19,6 @@ namespace OdWyer.RTS
 			if (!IsInvoking("EndNow"))
 				Invoke("EndNow", 1f);
 		}
-		public virtual void EndNow() => Destroy(gameObject);
+		private void EndNow() => Destroy(gameObject);
 	}
 }
