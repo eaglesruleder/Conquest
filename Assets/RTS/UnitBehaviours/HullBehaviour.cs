@@ -40,20 +40,23 @@ namespace OdWyer.RTS
 
 		public bool Damage(int damage, float[] armorBonus, Vector3 hitPoint)
 		{
-			ParticleSystem hitEffect = Instantiate
-				(ShieldEffect
-				,hitPoint
-				,Quaternion.LookRotation(transform.position - hitPoint)
-				,transform
-				);
-			Destroy (hitEffect.gameObject, 1f);
-		
-			ParticleSystem.MainModule main = hitEffect.main;
-			main.startSpeed = damage / 10;
-
-			hitEffect.Emit(damage * damage);
-		
 			damage = Mathf.CeilToInt(damage * Shield * armorBonus[ArmourLevel]);
+
+			if (ShieldEffect)
+			{
+				ParticleSystem hitEffect = Instantiate
+					(ShieldEffect
+					,hitPoint
+					,Quaternion.LookRotation(transform.position - hitPoint)
+					,transform
+					);
+				Destroy (hitEffect.gameObject, 1f);
+		
+				ParticleSystem.MainModule main = hitEffect.main;
+				main.startSpeed = damage / 10;
+
+				hitEffect.Emit(damage * damage);
+			}
 
 			AddCollisionTorque(hitPoint, damage);
 
@@ -83,14 +86,17 @@ namespace OdWyer.RTS
 
 		public void EndSelf()
 		{
-			ParticleSystem dieEffect = Instantiate
-				(DeathEffect
-				,transform.position
-				,transform.rotation
-				,transform
-				);
-			dieEffect.Emit(150);
-			Destroy (dieEffect.gameObject, 2f);
+			if(DeathEffect)
+			{
+				ParticleSystem dieEffect = Instantiate
+					(DeathEffect
+					,transform.position
+					,transform.rotation
+					,transform
+					);
+				dieEffect.Emit(150);
+				Destroy (dieEffect.gameObject, 2f);
+			}
 
 			foreach (IUnitLifecycle lifecycle in GetComponentsInChildren<IUnitLifecycle>())
 				lifecycle.BeforeDestroy();
