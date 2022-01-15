@@ -65,7 +65,8 @@ public class WeaponHanger : Weapon
                     pause = Time.time + fireRate;
 
 					//	Burn supplies
-                    Hull.SupplyBurn(supplyDrain);
+					if(Hull)
+						Hull.SupplyBurn(supplyDrain);
 
 					break;
                 }
