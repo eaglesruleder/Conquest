@@ -316,11 +316,9 @@ namespace OdWyer.Control
                                     //	For each selected update target
                                     foreach (PlayerControlled i in selectedObjects)
                                     {
-                                        //	As long as not self targeting
-                                        if (!i.Equals(tempObj))
-                                        {
-                                            i.SetTarget(tempObj);
-                                        }
+										TargetingBehaviour targeting = i.GetComponent<TargetingBehaviour>();
+										if (targeting && !i.Equals(tempObj))
+											targeting.SetTarget(tempObj);
                                     }
                                 }
                             }
@@ -459,18 +457,16 @@ namespace OdWyer.Control
             //	If Shift add as a waypoint destination
             bool increment = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-            //	Apply the move to selectedObject directly
-            selectedObject.SetMove(TargetPosition, !increment);
+			MovementBehaviour singleMovement = selectedObject.GetComponent<MovementBehaviour>();
+			if(singleMovement)
+				singleMovement.SetMove(TargetPosition, !increment);
 
             //	And for all other selected objs
             foreach (PlayerControlled pc in selectedObjects)
             {
-                if (!pc.Equals(selectedObject))
-                {
-                    //	Apply the move relative to selectedObj
-                    Vector3 relPos = pc.transform.position - selectedObject.transform.position;
-                    pc.SetMove(TargetPosition + relPos, increment);
-                }
+				MovementBehaviour selectedMovement = pc.GetComponent<MovementBehaviour>();
+				if (selectedMovement && !pc.Equals(selectedObject))
+					selectedMovement.SetMove(TargetPosition + pc.transform.position - selectedObject.transform.position, increment);
             }
         }
     }

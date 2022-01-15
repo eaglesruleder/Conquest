@@ -39,8 +39,5 @@ namespace OdWyer.RTS
 		{
 			Destroy(gameObject);
 		}
-
-		public abstract void SetTarget(PlayerControlled Target);
-		public abstract void SetMove(Vector3 Destination, bool Increment);
 	}
 }
