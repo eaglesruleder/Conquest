@@ -5,13 +5,8 @@ namespace OdWyer.RTS
 	[RequireComponent(typeof(HullBehaviour)), RequireComponent(typeof(MovementBehaviour)), RequireComponent(typeof(TargetingBehaviour))]
 	public class Unit : PlayerControlled
 	{
-		private Loadout_Unit loadout;
-		public Loadable_Hull loadable;
-
-		public Unit SetHull(Loadable_Hull loading)
+		public Unit SetHull(Loadable_Hull loadable)
 		{
-			loadable = loading;
-
 			gameObject.name = loadable.Loadable_Name;
 
 			if(!SelectionObj)
@@ -26,11 +21,11 @@ namespace OdWyer.RTS
 				Selected(false);
 			}
 
-			if(!Hull)
-			{
-				if (!SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.Loadable_Mesh))
-					throw new UnityException("MeshHandler " + loadable.Loadable_Mesh + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
+			if (!SelectableLoadout.ForgeAvailable<MeshHandler>(loadable.Loadable_Mesh))
+				throw new UnityException("MeshHandler " + loadable.Loadable_Mesh + " declared but not found on Loadable_Hull " + loadable.Loadable_ID);
 
+			if (!GetComponent<Renderer>())
+			{
 				MeshHandler hullobj = (MeshHandler)SelectableLoadout.Forge<MeshHandler>(loadable.Loadable_Mesh);
 				hullobj.transform.parent = transform;
 				hullobj.transform.localPosition = Vector3.zero;
@@ -46,36 +41,26 @@ namespace OdWyer.RTS
 			return this;
 		}
 
-		public Unit SetUnitLoadout(Loadout_Unit loading)
+		public Unit SetUnitLoadout(Loadout_Unit loadout)
 		{
-			if (!loading.Loadout_Hull.Equals(loadable.Loadable_ID))
-				throw new UnityException("hullID " + loadable.Loadable_ID + " does not match PlayerLoadout.UnitLoadout " + loading.Loadout_Hull);
-
-			loadout = loading;
 			gameObject.name = loadout.Loadout_Name;
 
 			foreach (Loadout.WeaponPos wp in loadout.weapons)
 			{
 				if (!SelectableLoadout.ForgeAvailable<Weapon>(wp.weaponID))
-					throw new UnityException("weaponID " + wp.weaponID + " declared but not found on PlayerLoadout.UnitLoadout " + loadout.Loadout_ID);
-			}
-		
-			int points = loadable.points;
-		
-			foreach (Loadout.WeaponPos wp in loadout.weapons)
-			{
+				{
+					Debug.LogWarning("weaponID " + wp.weaponID + " declared but not found on PlayerLoadout.UnitLoadout " + loadout.Loadout_ID);
+					continue;
+				}
+
 				Weapon temp = (Weapon)SelectableLoadout.Forge<Weapon>(wp.weaponID);
-			
-				points -= temp.points;
-				if(points < 0)
-					Debug.LogWarning("Points overdraw on " + loadout.Loadout_ID);
-			
+
 				temp.transform.parent = transform;
 				temp.transform.localPosition = wp.position.Convert;
 				temp.SetUnit(this);
 			}
 
-			Config_HullBehaviour(loading);
+			Config_HullBehaviour(loadout);
 
 			return this;
 		}
@@ -104,8 +89,8 @@ namespace OdWyer.RTS
 
 		private void Config_HullBehaviour(Loadout_Unit config)
 		{
-			Hull.ArmourLevel = loadout.armourLevel;
-			Hull.SupplyLevel = loadout.supplyLevel;
+			Hull.ArmourLevel = config.armourLevel;
+			Hull.SupplyLevel = config.supplyLevel;
 		}
 
 

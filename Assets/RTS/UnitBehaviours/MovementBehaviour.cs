@@ -10,7 +10,7 @@ namespace OdWyer.RTS
 	{
 		public float Speed = 0;
 		public float TurnSpeed = 1;
-		public float StopDistance= 0;
+		public float StopDistance = 0;
 
 		public float AvoidDistance => GetComponent<CapsuleCollider>().radius * 1.1f;
 
