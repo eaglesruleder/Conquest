@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
+
+using OdWyer.RTS;
 
 public class GUISelectionAbility : MonoBehaviour {
 
@@ -20,11 +21,11 @@ public class GUISelectionAbility : MonoBehaviour {
             Unit temp = selected as Unit;
 
             DamSec.gameObject.SetActive(true);
-            DamSec.text = "" + temp.damSec;
+            DamSec.text = "" + temp.DamPerSec;
             SupSec.gameObject.SetActive(true);
-            SupSec.text = "" + temp.supSec;
+            SupSec.text = "" + temp.SupPerSec;
             Range.gameObject.SetActive(true);
-            Range.text = "" + temp.engageDistance;
+            Range.text = "" + temp.EngageDistance;
 
             if(temp.upgWeaponActivatable)
             {

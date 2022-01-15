@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+
+using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using System.Collections.Generic;
+
+using OdWyer.RTS;
 
 public class GUIAllSelectedUnits : MonoBehaviour {
 
@@ -100,14 +102,14 @@ public class GUIAllSelectedUnits : MonoBehaviour {
 		{
 			reference = pc;
 
-			health.maxValue = reference.health;
-			health.value = reference.currentHealth;
+			health.maxValue = reference.Health;
+			health.value = reference.CurrentHealth;
 			
 			if (reference is Unit)
 			{
 				supplies.gameObject.SetActive(true);
-				supplies.maxValue = ((Unit)reference).supply;
-				supplies.value = ((Unit)reference).currentSupply;
+				supplies.maxValue = ((Unit)reference).Supply;
+				supplies.value = ((Unit)reference).CurrentSupply;
 			}
 			else
 			{
@@ -119,10 +121,10 @@ public class GUIAllSelectedUnits : MonoBehaviour {
 		{
 			if(reference)
 			{
-				health.value = reference.currentHealth;
+				health.value = reference.CurrentHealth;
 				if(reference is Unit)
 				{
-					supplies.value = ((Unit)reference).currentSupply;
+					supplies.value = ((Unit)reference).CurrentSupply;
 				}
 			}
 		}

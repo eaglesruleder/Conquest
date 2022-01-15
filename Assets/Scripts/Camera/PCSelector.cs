@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+
+using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections;
-using System.Collections.Generic;
 
 using OdWyer.Graphics;
+using OdWyer.RTS;
 
 namespace OdWyer.Control
 {
@@ -485,7 +486,7 @@ namespace OdWyer.Control
             bool increment = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
             //	Apply the move to selectedObject directly
-            selectedObject.SetMove(TargetPosition, increment);
+            selectedObject.SetMove(TargetPosition, !increment);
 
             //	And for all other selected objs
             foreach (PlayerControlled pc in selectedObjects)

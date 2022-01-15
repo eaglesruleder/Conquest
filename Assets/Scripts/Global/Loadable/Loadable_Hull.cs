@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using OdWyer.RTS;
 
 [System.Serializable]
 public class Loadable_Hull : Loadable
